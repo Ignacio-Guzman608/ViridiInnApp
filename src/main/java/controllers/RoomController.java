@@ -122,13 +122,13 @@ public class RoomController {
         boolean noDisp = !room.isAvailable();
 
         if (occupied) {
-          setText("Ocupada hoy");
+          setText("Ocupada");
           setStyle("-fx-text-fill: #c0392b; -fx-font-weight: bold;");
         } else if (noDisp) {
-          setText("No disponible");
+          setText("Fuera de sercio");
           setStyle("-fx-text-fill: #d97706; -fx-font-weight: bold;");
         } else {
-          setText("Disponible hoy");
+          setText("Disponible");
           setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
         }
       }
@@ -219,13 +219,13 @@ public class RoomController {
     boolean noDisp = !r.isAvailable();
 
     if (occupied) {
-      lblDetailStatus.setText("Ocupada hoy");
+      lblDetailStatus.setText("Ocupada");
       lblDetailStatus.setStyle("-fx-text-fill: #c0392b; -fx-font-weight: bold;");
     } else if (noDisp) {
-      lblDetailStatus.setText("No disponible");
+      lblDetailStatus.setText("Fuera de servicio");
       lblDetailStatus.setStyle("-fx-text-fill: #d97706; -fx-font-weight: bold;");
     } else {
-      lblDetailStatus.setText("Disponible hoy");
+      lblDetailStatus.setText("Disponible");
       lblDetailStatus.setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
     }
   }

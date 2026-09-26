@@ -132,9 +132,11 @@ public class ReservationRoomRepo {
     String sql = """
         SELECT DISTINCT rr.roomNumber
         FROM ReservationRoom rr
-        JOIN Reservation r ON rr.idReservation = r.idReservation
+        JOIN Reservation r        ON rr.idReservation = r.idReservation
+        JOIN ReservationStatus rs ON r.idReservationStatus = rs.idReservationStatus
         WHERE r.checkIn  < ?
           AND r.checkOut > ?
+          AND LOWER(rs.name) <> 'cancelada'
           AND (? IS NULL OR r.idReservation <> ?)
         """;
 

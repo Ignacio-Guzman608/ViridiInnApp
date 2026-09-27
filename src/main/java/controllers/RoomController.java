@@ -15,6 +15,13 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import models.Room;
 import repositories.RoomDAO;
+import models.OccupiedInterval;
+import repositories.RoomOccupancyDAO;
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import java.io.IOException;
 
@@ -79,6 +86,8 @@ public class RoomController {
   private final RoomDAO roomDAO = new RoomDAO();
   private final ObservableList<Room> masterRoomList = FXCollections.observableArrayList();
   private FilteredList<Room> filteredRooms;
+  private final RoomOccupancyDAO roomOccupancyDAO = new RoomOccupancyDAO();
+  private Set<Integer> occupiedTodayRoomNumbers = new HashSet<>();
 
   @FXML
   public void initialize() {
@@ -98,20 +107,30 @@ public class RoomController {
       }
     });
 
-    // ---- Columna Disponible: verde / naranja ----
     colAvailable.setCellFactory(tc -> new TableCell<Room, Boolean>() {
       @Override
       protected void updateItem(Boolean available, boolean empty) {
         super.updateItem(available, empty);
-        if (empty || available == null) {
+        Room room = getTableRow() != null ? getTableRow().getItem() : null;
+        if (empty || room == null) {
           setText(null);
           setStyle("");
           return;
         }
-        setText(available ? "Disponible" : "No disponible");
-        setStyle(available
-            ? "-fx-text-fill: green;"
-            : "-fx-text-fill: #d97706; -fx-font-weight: bold;");
+
+        boolean occupied = occupiedTodayRoomNumbers.contains(room.getNumber());
+        boolean noDisp = !room.isAvailable();
+
+        if (occupied) {
+          setText("Ocupada");
+          setStyle("-fx-text-fill: #c0392b; -fx-font-weight: bold;");
+        } else if (noDisp) {
+          setText("Fuera de sercio");
+          setStyle("-fx-text-fill: #d97706; -fx-font-weight: bold;");
+        } else {
+          setText("Disponible");
+          setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
+        }
       }
     });
 
@@ -167,8 +186,12 @@ public class RoomController {
   private void loadRooms() {
     try {
       masterRoomList.setAll(roomDAO.listActive());
-      // La vista principal NO muestra las que están fuera de servicio
       masterRoomList.removeIf(Room::isOutOfService);
+
+      // 👇 NUEVO: qué habitaciones están ocupadas HOY
+      LocalDate today = LocalDate.now();
+      Map<Integer, List<OccupiedInterval>> occupied = roomOccupancyDAO.findOccupiedInRange(today, today.plusDays(1));
+      occupiedTodayRoomNumbers = occupied.keySet();
 
       filteredRooms = new FilteredList<>(masterRoomList, p -> true);
       tableRooms.setItems(filteredRooms);
@@ -192,10 +215,19 @@ public class RoomController {
             : "--");
     lblDetailDescription.setText(r.getDescription() != null ? r.getDescription() : "--");
 
-    lblDetailStatus.setText(r.isAvailable() ? "Disponible" : "No disponible");
-    lblDetailStatus.setStyle(r.isAvailable()
-        ? "-fx-text-fill: green; -fx-font-weight: bold;"
-        : "-fx-text-fill: #d97706; -fx-font-weight: bold;");
+    boolean occupied = occupiedTodayRoomNumbers.contains(r.getNumber());
+    boolean noDisp = !r.isAvailable();
+
+    if (occupied) {
+      lblDetailStatus.setText("Ocupada");
+      lblDetailStatus.setStyle("-fx-text-fill: #c0392b; -fx-font-weight: bold;");
+    } else if (noDisp) {
+      lblDetailStatus.setText("Fuera de servicio");
+      lblDetailStatus.setStyle("-fx-text-fill: #d97706; -fx-font-weight: bold;");
+    } else {
+      lblDetailStatus.setText("Disponible");
+      lblDetailStatus.setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
+    }
   }
 
   private void clearDetail() {

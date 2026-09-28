@@ -94,6 +94,8 @@ public class NewReservationController {
 
   private DashboardController dashboardController;
   private Reservation reservationToEdit;
+  private boolean openedFromBookingChart = false;
+  private Integer selectedRoomFromChart;
 
   private final RoomDAO roomDAO;
   private final ReservationRepo reservationRepo;
@@ -306,91 +308,251 @@ public class NewReservationController {
   }
 
   private void loadRoomCards() {
+
     roomsContainer.getChildren().clear();
 
     int requested = getRequestedGuests();
-    System.out.println("[loadRoomCards] requested=" + requested
-        + " availableRooms=" + availableRooms.size()
-        + " availableTours=" + availableTours.size());
 
-    if (requested <= 0) {
+    System.out.println("[loadRoomCards] requested=" + requested
+            + " availableRooms=" + availableRooms.size()
+            + " availableTours=" + availableTours.size());
+
+    if (requested <= 0 && !openedFromBookingChart) {
+
       Label placeholder = new Label(
-          "Ingresá la cantidad de huéspedes para ver las habitaciones disponibles.");
-      placeholder.setStyle("-fx-text-fill: #888; -fx-font-style: italic; -fx-font-size: 13;");
+              "Ingresá la cantidad de huéspedes para ver las habitaciones disponibles.");
+
+      placeholder.setStyle(
+              "-fx-text-fill: #888;" +
+                      " -fx-font-style: italic;" +
+                      " -fx-font-size: 13;"
+      );
+
       roomsContainer.getChildren().add(placeholder);
       return;
     }
 
-    if (!availableRooms.isEmpty()) {
-      java.util.Set<Integer> selectedNumbers = selectedRooms.stream()
-          .map(Room::getNumber)
-          .collect(java.util.stream.Collectors.toSet());
+    /*
+     * BOOKING CHART MODE
+     */
+    if (openedFromBookingChart) {
+
+      Room selectedRoom = null;
 
       for (Room room : availableRooms) {
-        VBox card = new VBox(5);
 
-        Label lblNumber = new Label("Habitación " + room.getNumber());
-        Label lblType = new Label(room.getTypeName());
-        Label lblView = new Label(room.getViewName());
-        Label lblCapacity = new Label("Capacidad: " + room.getCapacity());
-        Label lblPrice = new Label(String.format("$ %.2f / noche", room.getPrice()));
+        if (room.getNumber() == selectedRoomFromChart) {
+          selectedRoom = room;
+          break;
+        }
+      }
 
-        card.getChildren().addAll(lblNumber, lblType, lblView, lblCapacity, lblPrice);
-        card.getStyleClass().add("room-card");
+      /*
+       * Selected room
+       */
+      if (selectedRoom != null) {
 
-        if (selectedNumbers.contains(room.getNumber())) {
-          card.getStyleClass().add("selected");
+        Label selectedTitle = new Label("Habitación seleccionada");
+        selectedTitle.setStyle(
+                "-fx-font-weight: bold;" +
+                        " -fx-text-fill: #2E6D3D;" +
+                        " -fx-padding: 5 0 5 0;"
+        );
+
+        roomsContainer.getChildren().add(selectedTitle);
+
+        boolean capacityOk = hasEnoughCapacity(selectedRoom);
+
+        VBox selectedCard =
+                createRoomCard(selectedRoom, true, !capacityOk);
+
+        roomsContainer.getChildren().add(selectedCard);
+
+        if (!capacityOk && requested > 0) {
+
+          Label warning = new Label(
+                  "⚠ La habitación " + selectedRoom.getNumber()
+                          + " tiene capacidad para "
+                          + selectedRoom.getCapacity()
+                          + " huésped(es), pero ingresaste "
+                          + requested + "."
+          );
+
+          warning.setStyle(
+                  "-fx-text-fill: #b36b00;" +
+                          " -fx-font-weight: bold;" +
+                          " -fx-padding: 5 0 10 0;"
+          );
+
+          roomsContainer.getChildren().add(warning);
+        }
+      }
+
+      /*
+       * Alternative rooms
+       */
+      java.util.List<Room> alternativeRooms = new java.util.ArrayList<>();
+
+      for (Room room : availableRooms) {
+
+        if (room.getNumber() == selectedRoomFromChart) {
+          continue;
         }
 
-        card.setOnMouseClicked(event -> {
-          boolean isSelected = selectedRooms.stream()
-              .anyMatch(r -> r.getNumber() == room.getNumber());
-          if (isSelected) {
-            selectedRooms.removeIf(r -> r.getNumber() == room.getNumber());
-            card.getStyleClass().remove("selected");
-          } else {
-            selectedRooms.add(room);
-            card.getStyleClass().add("selected");
-          }
-          updateTotalRate();
-        });
+        if (hasEnoughCapacity(room)) {
+          alternativeRooms.add(room);
+        }
+      }
+
+      if (!alternativeRooms.isEmpty()) {
+
+        Label alternativesTitle =
+                new Label("Otras habitaciones disponibles para estas fechas");
+
+        alternativesTitle.setStyle(
+                "-fx-font-weight: bold;" +
+                        " -fx-text-fill: #555;" +
+                        " -fx-padding: 10 0 5 0;"
+        );
+
+        roomsContainer.getChildren().add(alternativesTitle);
+
+        for (Room room : alternativeRooms) {
+
+          VBox card =
+                  createRoomCard(room, false, false);
+
+          roomsContainer.getChildren().add(card);
+        }
+
+      } else if (selectedRoom != null
+              && requested > 0
+              && !hasEnoughCapacity(selectedRoom)) {
+
+        Label noAlternatives = new Label(
+                "No hay otras habitaciones disponibles para "
+                        + requested
+                        + " huésped(es) en estas fechas."
+        );
+
+        noAlternatives.setStyle(
+                "-fx-text-fill: #888;" +
+                        " -fx-font-style: italic;" +
+                        " -fx-padding: 5 0 5 0;"
+        );
+
+        roomsContainer.getChildren().add(noAlternatives);
+      }
+
+      return;
+    }
+
+    /*
+     * NORMAL RESERVATION MODE
+     */
+    if (!availableRooms.isEmpty()) {
+
+      java.util.Set<Integer> selectedNumbers =
+              selectedRooms.stream()
+                      .map(Room::getNumber)
+                      .collect(java.util.stream.Collectors.toSet());
+
+      for (Room room : availableRooms) {
+
+        boolean selected =
+                selectedNumbers.contains(room.getNumber());
+
+        VBox card =
+                createRoomCard(room, selected, false);
 
         roomsContainer.getChildren().add(card);
       }
     }
 
+    /*
+     * HOTEL TOUR
+     */
     if (!availableTours.isEmpty()) {
-      Label lblTourTitle = new Label("🏨 Modo Hotel Tour — cambiás de habitación durante la estadía:");
-      lblTourTitle.setStyle("-fx-text-fill: #2d6cdf; -fx-font-weight: bold; -fx-padding: 10 0 4 0;");
+
+      Label lblTourTitle =
+              new Label("🏨 Modo Hotel Tour — cambiás de habitación durante la estadía:");
+
+      lblTourTitle.setStyle(
+              "-fx-text-fill: #2d6cdf;" +
+                      " -fx-font-weight: bold;" +
+                      " -fx-padding: 10 0 4 0;"
+      );
+
       roomsContainer.getChildren().add(lblTourTitle);
 
       for (HotelTour tour : availableTours) {
+
         VBox tourCard = new VBox(4);
-        tourCard.setStyle("-fx-background-color: #eef4ff; -fx-border-color: #2d6cdf;"
-            + " -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12;"
-            + " -fx-cursor: hand;");
 
-        Label lblRooms = new Label("Habitaciones: " + tour.getRoomsSummary());
-        lblRooms.setStyle("-fx-font-weight: bold; -fx-text-fill: #2d6cdf;");
+        tourCard.setStyle(
+                "-fx-background-color: #eef4ff;" +
+                        " -fx-border-color: #2d6cdf;" +
+                        " -fx-border-radius: 8;" +
+                        " -fx-background-radius: 8;" +
+                        " -fx-padding: 12;" +
+                        " -fx-cursor: hand;"
+        );
 
-        Label lblMoves = new Label(tour.getMoves() + " cambio(s) de habitación");
-        Label lblPrice = new Label(String.format("Total: $ %.2f", tour.getTotalPrice()));
+        Label lblRooms =
+                new Label("Habitaciones: " + tour.getRoomsSummary());
 
-        tourCard.getChildren().addAll(lblRooms, lblMoves, lblPrice);
+        lblRooms.setStyle(
+                "-fx-font-weight: bold;" +
+                        " -fx-text-fill: #2d6cdf;"
+        );
+
+        Label lblMoves =
+                new Label(tour.getMoves() + " cambio(s) de habitación");
+
+        Label lblPrice =
+                new Label(
+                        String.format(
+                                "Total: $ %.2f",
+                                tour.getTotalPrice()
+                        )
+                );
+
+        tourCard.getChildren().addAll(
+                lblRooms,
+                lblMoves,
+                lblPrice
+        );
 
         for (TourSegment seg : tour.getSegments()) {
-          Label segLabel = new Label(String.format("  • Hab. %d del %s al %s (%d noches, $%.2f)",
-              seg.getRoom().getNumber(), seg.getFrom(), seg.getTo(),
-              seg.getNights(), seg.getSubtotal()));
-          segLabel.setStyle("-fx-text-fill: #555; -fx-font-size: 11;");
+
+          Label segLabel =
+                  new Label(
+                          String.format(
+                                  "  • Hab. %d del %s al %s (%d noches, $%.2f)",
+                                  seg.getRoom().getNumber(),
+                                  seg.getFrom(),
+                                  seg.getTo(),
+                                  seg.getNights(),
+                                  seg.getSubtotal()
+                          )
+                  );
+
+          segLabel.setStyle(
+                  "-fx-text-fill: #555;" +
+                          " -fx-font-size: 11;"
+          );
+
           tourCard.getChildren().add(segLabel);
         }
 
         tourCard.setOnMouseClicked(e -> {
+
           selectedRooms.clear();
+
           for (TourSegment seg : tour.getSegments()) {
             selectedRooms.add(seg.getRoom());
           }
+
           loadRoomCards();
           updateTotalRate();
         });
@@ -400,11 +562,108 @@ public class NewReservationController {
     }
 
     if (availableRooms.isEmpty() && availableTours.isEmpty()) {
-      Label placeholder = new Label(
-          "No hay habitaciones ni tours disponibles para " + requested + " huésped(es).");
-      placeholder.setStyle("-fx-text-fill: #c0392b; -fx-font-weight: bold; -fx-font-size: 13;");
+
+      Label placeholder =
+              new Label(
+                      "No hay habitaciones ni tours disponibles para "
+                              + requested
+                              + " huésped(es)."
+              );
+
+      placeholder.setStyle(
+              "-fx-text-fill: #888;" +
+                      " -fx-font-style: italic;" +
+                      " -fx-font-size: 13;"
+      );
+
       roomsContainer.getChildren().add(placeholder);
     }
+  }
+
+  private VBox createRoomCard(
+          Room room,
+          boolean selected,
+          boolean capacityWarning) {
+
+    VBox card = new VBox(5);
+
+    Label lblNumber =
+            new Label("Habitación " + room.getNumber());
+
+    Label lblType =
+            new Label(room.getTypeName());
+
+    Label lblView =
+            new Label(room.getViewName());
+
+    Label lblCapacity =
+            new Label("Capacidad: " + room.getCapacity());
+
+    Label lblPrice =
+            new Label(
+                    String.format(
+                            "$ %.2f / noche",
+                            room.getPrice()
+                    )
+            );
+
+    card.getChildren().addAll(
+            lblNumber,
+            lblType,
+            lblView,
+            lblCapacity,
+            lblPrice
+    );
+
+    card.getStyleClass().add("room-card");
+
+    if (selected) {
+      card.getStyleClass().add("selected");
+    }
+
+    if (capacityWarning) {
+      card.getStyleClass().add("capacity-warning");
+    }
+
+    card.setOnMouseClicked(event -> {
+
+      if (openedFromBookingChart) {
+
+        selectedRooms.clear();
+        selectedRooms.add(room);
+
+        selectedRoomFromChart = room.getNumber();
+
+        loadRoomCards();
+        updateTotalRate();
+
+        return;
+      }
+
+      boolean isSelected =
+              selectedRooms.stream()
+                      .anyMatch(
+                              r -> r.getNumber() == room.getNumber()
+                      );
+
+      if (isSelected) {
+
+        selectedRooms.removeIf(
+                r -> r.getNumber() == room.getNumber()
+        );
+
+        card.getStyleClass().remove("selected");
+
+      } else {
+
+        selectedRooms.add(room);
+        card.getStyleClass().add("selected");
+      }
+
+      updateTotalRate();
+    });
+
+    return card;
   }
 
   private void loadAvailableRooms() {
@@ -431,13 +690,33 @@ public class NewReservationController {
     }
 
     Integer idReservationToExclude = reservationToEdit != null
-        ? reservationToEdit.getIdReservation()
-        : null;
+            ? reservationToEdit.getIdReservation()
+            : null;
 
     List<Integer> occupiedRooms = reservationRoomRepo.getOccupiedRoomNumbers(
-        dpCheckIn.getValue(), dpCheckOut.getValue(), idReservationToExclude);
+            dpCheckIn.getValue(), dpCheckOut.getValue(), idReservationToExclude);
 
     availableRooms.clear();
+
+    if (openedFromBookingChart && selectedRoomFromChart != null) {
+
+      for (Room room : activeRooms) {
+
+        boolean isFree = !occupiedRooms.contains(room.getNumber());
+
+        if (!isFree) {
+          continue;
+        }
+
+        availableRooms.add(room);
+      }
+
+      availableTours = new ArrayList<>();
+
+      loadRoomCards();
+      return;
+    }
+
     for (Room room : activeRooms) {
       boolean isFree = !occupiedRooms.contains(room.getNumber());
       boolean alreadyPicked = selectedRooms.stream()
@@ -1203,4 +1482,30 @@ public class NewReservationController {
     a.setContentText(msg);
     a.showAndWait();
   }
+
+  public void setSelectedRoom(int roomNumber) {
+    this.openedFromBookingChart = true;
+    this.selectedRoomFromChart = roomNumber;
+
+    selectedRooms.clear();
+
+    for (Room room : activeRooms) {
+      if (room.getNumber() == roomNumber) {
+        selectedRooms.add(room);
+        break;
+      }
+    }
+
+    loadRoomCards();
+    updateTotalRate();
+  }
+
+  public void setSelectedDates(LocalDate checkIn, LocalDate checkOut) {
+    dpCheckIn.setValue(checkIn);
+    dpCheckOut.setValue(checkOut);
+
+    loadAvailableRooms();
+    updateTotalRate();
+  }
+
 }

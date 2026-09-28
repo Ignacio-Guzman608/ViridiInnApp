@@ -1363,6 +1363,11 @@
     -fx-border-width: 2;
 }
 
+.room-card.capacity-warning {
+    -fx-border-color: #d99a2b;
+    -fx-border-width: 2;
+}
+
 .planilla-container {
     -fx-background-color: #f5f8f5;
 }
@@ -1418,33 +1423,48 @@
     -fx-text-fill: #2E6D3D;
 }
 
+.pending-block {
+    -fx-background-color: #f2d36b;
+}
+
+.confirmed-block {
+    -fx-background-color: #6fa879;
+}
+
+.finished-block {
+    -fx-background-color: #d9d9d9;
+}
+
 .booking-cell {
     -fx-background-color: white;
     -fx-border-color: #d5dfd7;
     -fx-border-width: 0 1 1 0;
 }
 
-.pending-cell {
-    -fx-background-color: #f2d36b;
-    -fx-border-color: #d5dfd7;
-    -fx-border-width: 0 1 1 0;
+.booking-cell.selected-cell {
+    -fx-background-color: #dcefe1;
+    -fx-border-color: #4f855d;
+    -fx-border-width: 2;
 }
 
-.confirmed-cell {
-    -fx-background-color: #6fa879;
+.booking-cell.occupied-cell {
     -fx-border-color: #d5dfd7;
-    -fx-border-width: 0 1 1 0;
 }
 
-.finished-cell {
-    -fx-background-color: #d9d9d9;
-    -fx-border-color: #d5dfd7;
-    -fx-border-width: 0 1 1 0;
+.booking-block {
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
 }
 
-.booking-cell:hover {
-    -fx-background-color: #e7f2e9;
-    -fx-cursor: hand;
+.booking-block.selected-block {
+    -fx-border-color: #2E6D3D;
+    -fx-border-width: 2;
+}
+
+.reservation-container {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 8 0;
 }
 
 .hamburger-button {

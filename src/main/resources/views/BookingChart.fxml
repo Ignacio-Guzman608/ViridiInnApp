@@ -48,6 +48,10 @@
                           text="2° QUINCENA"
                           styleClass="view-button"/>
 
+            <Button fx:id="btnNewReservation"
+                    text="NUEVA RESERVA"
+                    styleClass="view-button"/>
+
         </HBox>
     </top>
 

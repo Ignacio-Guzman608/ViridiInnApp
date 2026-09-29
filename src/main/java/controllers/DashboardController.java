@@ -1,7 +1,11 @@
 package controllers;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Region;
 import models.Reservation;
 import javafx.scene.Parent;
 import javafx.scene.control.ToggleButton;
@@ -15,14 +19,15 @@ import javafx.scene.control.Button;
 public class DashboardController {
 
   @FXML
+  private ImageView logoApp;
+  @FXML
+  private Region espaciadorTop;
+  @FXML
   private VBox leftMenu;
-
   @FXML
   private Button btnMenu;
-
   @FXML
   private AnchorPane centerPane;
-
   @FXML
   private ToggleButton btnPlanilla;
   @FXML
@@ -43,6 +48,18 @@ public class DashboardController {
   @FXML
   public void initialize() {
     // 1. Crear un ToggleGroup para que solo un botón esté seleccionado a la vez
+    leftMenu.getStyleClass().add("collapsed");
+    leftMenu.setPrefWidth(70);
+    leftMenu.setMinWidth(70);
+    leftMenu.setMaxWidth(70);
+    ocultarLogo(true);
+    ajustarEspaciador(true);
+
+    Platform.runLater(() -> {
+      double anchoBoton = btnMenu.getWidth() > 0 ? btnMenu.getWidth() : 40;
+      btnMenu.setTranslateX(-(70 - anchoBoton) / 2);
+    });
+
     menuGroup = new ToggleGroup();
     btnPlanilla.setToggleGroup(menuGroup);
     loadView("/views/BookingChart.fxml");
@@ -53,10 +70,19 @@ public class DashboardController {
     btnPersonal.setToggleGroup(menuGroup);
     btnConfiguracion.setToggleGroup(menuGroup);
 
-    // 2. Seleccionar "Planilla" por defecto
+    // 2. Asignar tooltips
+    btnPlanilla.setTooltip(new Tooltip("Planilla"));
+    btnReservas.setTooltip(new Tooltip("Reservas"));
+    btnHabitaciones.setTooltip(new Tooltip("Habitaciones"));
+    btnClientes.setTooltip(new Tooltip("Clientes"));
+    btnReportes.setTooltip(new Tooltip("Reportes"));
+    btnPersonal.setTooltip(new Tooltip("Personal"));
+    btnConfiguracion.setTooltip(new Tooltip("Configuracion"));
+
+    // 3. Seleccionar "Planilla" por defecto
     btnPlanilla.setSelected(true);
 
-    // 3. Asignar acciones a los botones
+    // 4. Asignar acciones a los botones
     btnPlanilla.setOnAction(e -> {
       selectButton(btnPlanilla);
       loadView("/views/BookingChart.fxml");
@@ -85,15 +111,37 @@ public class DashboardController {
       selectButton(btnConfiguracion);
       loadView("/views/Configuration.fxml");
     });
+
+    // 5. Centrar btn hamburguesa al iniciar
+    btnMenu.setTranslateX(-10);
   }
 
   @FXML
   private void toggleSidebar() {
+    boolean collapsed = leftMenu.getStyleClass().contains("collapsed");
 
-    boolean visible = leftMenu.isVisible();
-
-    leftMenu.setVisible(!visible);
-    leftMenu.setManaged(!visible);
+    if (collapsed) {
+      // Expandir
+      leftMenu.getStyleClass().remove("collapsed");
+      leftMenu.setPrefWidth(240);
+      leftMenu.setMinWidth(240);
+      leftMenu.setMaxWidth(240);
+      ajustarEspaciador(!collapsed);
+      ocultarLogo(false);
+      btnMenu.setTranslateX(-10);
+    } else {
+      // Colapsar
+      leftMenu.getStyleClass().add("collapsed");
+      leftMenu.setPrefWidth(70);
+      leftMenu.setMinWidth(70);
+      leftMenu.setMaxWidth(70);
+      ocultarLogo(true);
+      ajustarEspaciador(!collapsed);
+      Platform.runLater(() -> {
+        double anchoBoton = btnMenu.getWidth() > 0 ? btnMenu.getWidth() : 40;
+        btnMenu.setTranslateX(-(70 - anchoBoton) / 2);
+      });
+    }
   }
 
   /**
@@ -256,5 +304,13 @@ public class DashboardController {
         System.err.println("Botón desconocido: " + buttonName);
     }
   }
+  private void ocultarLogo(boolean ocultar) {
+    logoApp.setVisible(!ocultar);
+    logoApp.setManaged(!ocultar); // ← clave: no participa del layout
+  }
 
+  private void ajustarEspaciador(boolean colapsada) {
+    espaciadorTop.setMinHeight(colapsada ? 50 : 0);
+    espaciadorTop.setPrefHeight(colapsada ? 50 : 0);
+  }
 }

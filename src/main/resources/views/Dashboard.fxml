@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.layout.Region?>
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controllers.DashboardController">
@@ -20,84 +21,100 @@
         <StackPane>
 
             <VBox fx:id="leftMenu"
-                  prefHeight="0.0"
-                  prefWidth="276.0"
-                  spacing="5"
+                  prefWidth="240.0"
+                  spacing="6"
                   styleClass="sidebar">
 
                 <padding>
-                    <Insets bottom="20"
-                            left="20"
-                            right="20"
-                            top="20" />
+                    <Insets bottom="20" left="12" right="12" top="20" />
                 </padding>
 
-                <ImageView fitHeight="80.0"
-                           fitWidth="200.0"
+                <!-- Logo / título -->
+                <ImageView fx:id="logoApp"
+                           fitHeight="225.0"
+                           fitWidth="142.0"
                            pickOnBounds="true"
                            preserveRatio="true">
-                    <Image url="@../images/hotel-icon.png" />
+                    <Image url="@../images/viridinn_isologo.png" />
                 </ImageView>
 
-                <Label styleClass="sidebar-titulo"
-                       text="SISTEMA HOTEL" />
+                <!-- <Label styleClass="sidebar-titulo" text="SISTEMA HOTEL" /> -->
 
-                <VBox prefHeight="406.0"
-                      prefWidth="236.0"
-                      spacing="5"
-                      VBox.vgrow="ALWAYS">
+                <Region fx:id="espaciadorTop" minHeight="0.0" prefHeight="0.0" />
 
-                    <VBox prefHeight="220.0"
-                          prefWidth="236.0"
-                          spacing="10"
-                          VBox.vgrow="ALWAYS">
+                <!-- Botones -->
+                <ToggleButton fx:id="btnPlanilla" styleClass="sidebar-btn" text="Planilla de reserva">
+                    <graphic>
+                        <ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
+                            <Image url="@../images/blocks.png" />
+                        </ImageView>
+                    </graphic>
+                </ToggleButton>
 
-                        <ToggleButton fx:id="btnPlanilla"
-                                      styleClass="sidebar-btn"
-                                      text="Planilla de reserva" />
+                <ToggleButton fx:id="btnReservas" styleClass="sidebar-btn" text="Reservas">
+                    <graphic>
+                        <ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
+                            <Image url="@../images/calendar-days.png" />
+                        </ImageView>
+                    </graphic>
+                </ToggleButton>
 
-                        <ToggleButton fx:id="btnReservas"
-                                      styleClass="sidebar-btn"
-                                      text="Reservas" />
+                <ToggleButton fx:id="btnHabitaciones" styleClass="sidebar-btn" text="Habitaciones">
+                    <graphic>
+                        <ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
+                            <Image url="@../images/bed-double.png" />
+                        </ImageView>
+                    </graphic>
+                </ToggleButton>
 
-                        <ToggleButton fx:id="btnHabitaciones"
-                                      styleClass="sidebar-btn"
-                                      text="Habitaciones" />
+                <ToggleButton fx:id="btnClientes" styleClass="sidebar-btn" text="Clientes">
+                    <graphic>
+                        <ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
+                            <Image url="@../images/user-search.png" />
+                        </ImageView>
+                    </graphic>
+                </ToggleButton>
 
-                        <ToggleButton fx:id="btnClientes"
-                                      styleClass="sidebar-btn"
-                                      text="Clientes" />
+                <ToggleButton fx:id="btnReportes" styleClass="sidebar-btn" text="Reportes">
+                    <graphic>
+                        <ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
+                            <Image url="@../images/file-chart-column.png" />
+                        </ImageView>
+                    </graphic>
+                </ToggleButton>
 
-                        <ToggleButton fx:id="btnReportes"
-                                      styleClass="sidebar-btn"
-                                      text="Reportes" />
+                <ToggleButton fx:id="btnPersonal" styleClass="sidebar-btn" text="Personal">
+                    <graphic>
+                        <ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
+                            <Image url="@../images/user-group.png" />
+                        </ImageView>
+                    </graphic>
+                </ToggleButton>
 
-                        <ToggleButton fx:id="btnPersonal"
-                                      styleClass="sidebar-btn"
-                                      text="Personal" />
+                <ToggleButton fx:id="btnConfiguracion" styleClass="sidebar-btn" text="Configuración">
+                    <graphic>
+                        <ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
+                            <Image url="@../images/settings.png" />
+                        </ImageView>
+                    </graphic>
+                </ToggleButton>
 
-                        <ToggleButton fx:id="btnConfiguracion"
-                                      styleClass="sidebar-btn"
-                                      text="Configuración" />
+                <!-- Espaciador flexible -->
+                <VBox VBox.vgrow="ALWAYS" />
 
-                    </VBox>
-                </VBox>
+                <Label styleClass="sidebar-usuario" text="👤 Admin" />
 
-                <Label styleClass="sidebar-usuario"
-                       text="👤 Admin" />
-
-                <Button styleClass="sidebar-logout"
-                        text="Cerrar sesión">
-
-                    <VBox.margin>
-                        <Insets bottom="2.0" />
-                    </VBox.margin>
-
+                <Button styleClass="sidebar-logout" text="Cerrar sesión">
+                    <graphic>
+                        <ImageView fitHeight="18" fitWidth="18" preserveRatio="true">
+                            <Image url="@../images/log-out.png" />
+                        </ImageView>
+                    </graphic>
                 </Button>
 
             </VBox>
 
-            <!-- ==================== HAMBURGER ==================== -->
+            <!-- Botón hamburguesa -->
             <Button fx:id="btnMenu"
                     text="☰"
                     onAction="#toggleSidebar"

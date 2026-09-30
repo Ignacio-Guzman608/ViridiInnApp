@@ -268,10 +268,43 @@ CREATE TABLE Consumption (
     CONSTRAINT fk_consumption_status FOREIGN KEY (idConsumptionStatus) REFERENCES ConsumptionStatus(idConsumptionStatus)
 );
 
+-- ==========================================
+-- USERS
+-- ==========================================
+CREATE TABLE User (
+    idUser INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    passwordHash VARCHAR(255) NOT NULL,
+    salt VARCHAR(50) NOT NULL,
+    fullName VARCHAR(100) NOT NULL,
+    role VARCHAR(30) NOT NULL DEFAULT 'RECEPCIONISTA',
+    active BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+-- ==========================================
+-- SETTINGS (para el toggle de login)
+-- ==========================================
+CREATE TABLE Settings (
+    settingKey VARCHAR(50) PRIMARY KEY,
+    settingValue VARCHAR(255) NOT NULL
+);
 
 -- ==========================================
 -- INSERTS - DATOS INDEPENDIENTES
 -- ==========================================
+
+
+INSERT INTO Settings (settingKey, settingValue) VALUES
+('login.enabled', 'true'),
+('login.timeoutMinutes', '30');
+
+INSERT INTO User (username, passwordHash, salt, fullName, role, active) VALUES
+('admin',    'REEMPLAZAR_HASH_AQUI', 'defaultSalt2024', 'Administrador',       'ADMIN',          TRUE),
+
+('recepcion','REEMPLAZAR_HASH_AQUI', 'defaultSalt2024', 'Recepcionista Demo',  'RECEPCIONISTA',  TRUE);
+
+UPDATE User SET passwordHash = 'admin123',     salt = 'no-salt' WHERE username = 'admin';
+UPDATE User SET passwordHash = 'recepcion123', salt = 'no-salt' WHERE username = 'recepcion';
 
 INSERT INTO DocumentType (name) VALUES
 ('dni'),

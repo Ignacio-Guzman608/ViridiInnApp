@@ -1,45 +1,30 @@
 package models;
 
 public class User {
-  private int idUser;
-  private String name;
-  private String password;
-  private boolean status; // estado de perfil, si está habilitado o no.
-  private String permissions; // escala de permits, usuario, admin, o persimisos a seleccionar??
-  private String role;
+    private int idUser;
+    private String username;
+    private String passwordHash;
+    private String salt;
+    private String fullName;
+    private String role;
+    private boolean active;
 
-  public User(int idUser, String name, String password, boolean enable, String permissions, String role) {
-    this.name = name;
-    this.password = password;
-    this.status = true;
-    this.permissions = permissions;
-    this.role = role;
-  }
+    public User(int idUser, String username, String passwordHash, String salt,
+                String fullName, String role, boolean active) {
+        this.idUser = idUser;
+        this.username = username;
+        this.passwordHash = passwordHash;
+        this.salt = salt;
+        this.fullName = fullName;
+        this.role = role;
+        this.active = active;
+    }
 
-  public int getIdUser() {
-    return idUser;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public boolean getStatus() {
-    return status;
-  }
-
-  public String getPermissions() {
-    return permissions;
-  }
-
-  public String getRole() {
-    return role;
-  }
-
-  // funcion de logging, mepa que hay que hacer una clase para el logging...como
-  // un servicio
-  public boolean Loggin(String user, String password) {
-    return true;
-  }
-  // funcion de logout
+    public int getIdUser()         { return idUser; }
+    public String getUsername()    { return username; }
+    public String getPasswordHash(){ return passwordHash; }
+    public String getSalt()        { return salt; }
+    public String getFullName()    { return fullName; }
+    public String getRole()        { return role; }
+    public boolean isActive()      { return active; }
 }

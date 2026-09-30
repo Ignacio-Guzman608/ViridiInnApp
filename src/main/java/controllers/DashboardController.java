@@ -14,7 +14,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import java.io.IOException;
 import javafx.scene.control.Button;
-
+import auth.LoginGuard;
+import auth.LoginManager;
+import javafx.scene.control.Label;
+import javafx.scene.control.Alert;
 
 public class DashboardController {
 
@@ -42,6 +45,10 @@ public class DashboardController {
   private ToggleButton btnPersonal;
   @FXML
   private ToggleButton btnConfiguracion;
+  @FXML
+  private Label lblUsuario;
+  @FXML
+  private Button btnSession;
 
   private ToggleGroup menuGroup;
 
@@ -114,6 +121,9 @@ public class DashboardController {
 
     // 5. Centrar btn hamburguesa al iniciar
     btnMenu.setTranslateX(-10);
+
+    LoginManager.getInstance().refreshConfig(); // por si cambiaron el toggle
+    updateSessionUI();
   }
 
   @FXML
@@ -217,15 +227,12 @@ public class DashboardController {
     try {
 
       FXMLLoader loader = new FXMLLoader(
-              getClass().getResource(
-                      "/views/ConsumptionManagement.fxml"
-              )
-      );
+          getClass().getResource(
+              "/views/ConsumptionManagement.fxml"));
 
       Parent view = loader.load();
 
-      ConsumptionManagementController controller =
-              loader.getController();
+      ConsumptionManagementController controller = loader.getController();
 
       controller.setDashboardController(this);
       controller.setReservation(reservation);
@@ -248,15 +255,12 @@ public class DashboardController {
     try {
 
       FXMLLoader loader = new FXMLLoader(
-              getClass().getResource(
-                      "/views/ReservationDetail.fxml"
-              )
-      );
+          getClass().getResource(
+              "/views/ReservationDetail.fxml"));
 
       Parent view = loader.load();
 
-      ReservationDetailController controller =
-              loader.getController();
+      ReservationDetailController controller = loader.getController();
 
       controller.setDashboardController(this);
       controller.setReservation(reservation);
@@ -273,6 +277,7 @@ public class DashboardController {
       e.printStackTrace();
     }
   }
+
   /**
    * Selecciona programáticamente un botón de la sidebar.
    * Útil cuando se navega a una vista desde otra (ej: historial → reservas).
@@ -304,6 +309,7 @@ public class DashboardController {
         System.err.println("Botón desconocido: " + buttonName);
     }
   }
+
   private void ocultarLogo(boolean ocultar) {
     logoApp.setVisible(!ocultar);
     logoApp.setManaged(!ocultar); // ← clave: no participa del layout
@@ -312,5 +318,61 @@ public class DashboardController {
   private void ajustarEspaciador(boolean colapsada) {
     espaciadorTop.setMinHeight(colapsada ? 50 : 0);
     espaciadorTop.setPrefHeight(colapsada ? 50 : 0);
+  }
+
+  /**
+   * Un solo botón que sirve para:
+   * - Iniciar sesión si no hay sesión activa
+   * - Cerrar sesión si ya hay alguien logueado
+   * - Mostrar aviso si el login está desactivado
+   */
+  @FXML
+  private void handleSessionButton() {
+    LoginManager lm = LoginManager.getInstance();
+
+    if (!lm.isLoginEnabled()) {
+      Alert alert = new Alert(Alert.AlertType.INFORMATION);
+      alert.setTitle("Login desactivado");
+      alert.setHeaderText(null);
+      alert.setContentText(
+          "El sistema de login está desactivado.\n" +
+              "Para activarlo, un administrador debe hacerlo desde Configuración → Seguridad.");
+      alert.showAndWait();
+      return;
+    }
+
+    if (lm.isAuthenticated()) {
+      lm.logout();
+    } else {
+      LoginGuard.requireAccess();
+    }
+
+    updateSessionUI();
+  }
+
+  /**
+   * Refresca el texto del label y del botón de sesión según el estado actual.
+   */
+  private void updateSessionUI() {
+    LoginManager lm = LoginManager.getInstance();
+
+    if (!lm.isLoginEnabled()) {
+      lblUsuario.setText("🔓 Login off");
+      btnSession.setText("Login off");
+      btnSession.setDisable(true);
+      return;
+    }
+
+    btnSession.setDisable(false);
+
+    if (lm.isAuthenticated()) {
+      String nombre = lm.getCurrentUser().getFullName();
+      String rol = lm.getCurrentUser().getRole();
+      lblUsuario.setText("👤 " + nombre + " (" + rol + ")");
+      btnSession.setText("Cerrar sesión");
+    } else {
+      lblUsuario.setText("🔒 Sin sesión");
+      btnSession.setText("Iniciar sesión");
+    }
   }
 }

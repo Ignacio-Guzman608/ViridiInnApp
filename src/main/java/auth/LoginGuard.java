@@ -47,25 +47,16 @@ public class LoginGuard {
 
       Scene scene = new Scene(root);
 
-      // 👇 Tu CSS global
-      var css = LoginGuard.class.getResource("/styles/styles.css");
-      if (css != null) {
-        scene.getStylesheets().add(css.toExternalForm());
-      }
-
+      // 👇 Igual que RoomForm: nada de setWidth/setHeight manual
       Stage stage = new Stage();
       stage.setTitle("Iniciar Sesión");
 
+      // Modal: bloquea la principal y queda siempre encima
       stage.initModality(Modality.APPLICATION_MODAL);
 
-      // 👇 Tamaño fijo (equivalente al prefWidth/prefHeight del FXML)
-      stage.setWidth(380);
-      stage.setHeight(420);
-
-      stage.sizeToScene(); // 👈 se ajusta al contenido del FXML
       stage.setScene(scene);
 
-      // 👇 Centrada en pantalla (no pegada a la esquina)
+      stage.sizeToScene();
       stage.centerOnScreen();
 
       stage.showAndWait();

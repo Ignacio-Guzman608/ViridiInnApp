@@ -21,13 +21,11 @@ public class RoomFormController {
   private static final String SAFE_FEATURE = "Caja fuerte";
   private static final int MAX_DESCRIPTION_LENGTH = 100;
 
-  // Límites de dígitos por campo
-  private static final int MAX_DIGITS_NUMBER = 4; // 0..9999
-  private static final int MAX_DIGITS_FLOOR = 3; // 0..999
-  private static final int MAX_DIGITS_CAPACITY = 3; // 0..999
+  private static final int MAX_DIGITS_NUMBER = 4;
+  private static final int MAX_DIGITS_FLOOR = 3;
+  private static final int MAX_DIGITS_CAPACITY = 3;
 
-  // Límite de precio (para el TextFormatter)
-  private static final int MAX_PRICE_INT_DIGITS = 6; // hasta 999999
+  private static final int MAX_PRICE_INT_DIGITS = 6;
   private static final int MAX_PRICE_DECIMALS = 2;
 
   private static final Logger logger = LoggerFactory.getLogger(RoomFormController.class);
@@ -72,10 +70,6 @@ public class RoomFormController {
 
   private Room editingRoom;
 
-  // ============================================================
-  // INITIALIZATION
-  // ============================================================
-
   @FXML
   public void initialize() {
     loadCatalogs();
@@ -103,37 +97,23 @@ public class RoomFormController {
     btnSave.setOnAction(e -> saveRoom());
   }
 
-  // ============================================================
-  // INPUT RESTRICTIONS (TextFormatter)
-  // ============================================================
-
-  /**
-   * Restringe un TextField a solo dígitos, con un máximo de {@code maxDigits}.
-   * Bloquea tanto el tipeo como el pegado de contenido inválido.
-   */
   private void setupNumericField(TextField field, int maxDigits) {
     field.setTextFormatter(new TextFormatter<>(change -> {
       String newText = change.getControlNewText();
       if (newText.isEmpty() || newText.matches("\\d{0," + maxDigits + "}")) {
         return change;
       }
-      return null; // rechaza el cambio
+      return null;
     }));
   }
 
-  /**
-   * Restringe el campo de precio: solo dígitos y hasta un punto decimal
-   * con un máximo de decimales configurado.
-   */
   private void setupPriceField() {
     txtPrice.setTextFormatter(new TextFormatter<>(change -> {
       String newText = change.getControlNewText();
 
-      // Vacío permitido (para poder limpiar)
       if (newText.isEmpty())
         return change;
 
-      // Un solo punto decimal, hasta N decimales, hasta M enteros
       String regex = "\\d{0," + MAX_PRICE_INT_DIGITS + "}(\\.\\d{0," + MAX_PRICE_DECIMALS + "})?";
       if (newText.matches(regex)) {
         return change;
@@ -149,7 +129,6 @@ public class RoomFormController {
   }
 
   private void setupDescriptionLimit() {
-    // Bloquea la escritura una vez alcanzado el límite (aplica también a pegar).
     txtDescription.setTextFormatter(new TextFormatter<>(change -> {
       if (change.getControlNewText().length() <= MAX_DESCRIPTION_LENGTH) {
         return change;
@@ -157,14 +136,12 @@ public class RoomFormController {
       return null;
     }));
 
-    // Actualiza el contador en tiempo real.
     txtDescription.textProperty().addListener((obs, oldVal, newVal) -> {
       int len = newVal == null ? 0 : newVal.length();
       lblCharCounter.setText(len + "/" + MAX_DESCRIPTION_LENGTH + " caracteres");
       updateCounterStyle(len);
     });
 
-    // Estado inicial por si el campo ya viniera con texto.
     updateCounterStyle(txtDescription.getText() == null ? 0 : txtDescription.getText().length());
   }
 
@@ -178,10 +155,6 @@ public class RoomFormController {
       lblCharCounter.getStyleClass().add("char-counter");
     }
   }
-
-  // ============================================================
-  // EDIT MODE
-  // ============================================================
 
   public void setRoom(Room room) {
     logger.debug("Ejecutando setRoom para room {}", room);
@@ -270,38 +243,24 @@ public class RoomFormController {
     return 0;
   }
 
-  // ============================================================
-  // VALIDATION
-  // ============================================================
-
-  /**
-   * Valida un campo entero: no vacío, solo dígitos, y con longitud máxima.
-   * Usa {@code .length()} ANTES de parsear para evitar NumberFormatException
-   * cuando el valor excede Integer.MAX_VALUE.
-   *
-   * @return true si el campo es válido (seguro para parseInt)
-   */
   private boolean validateIntegerField(String rawText,
       String fieldName,
       int maxDigits,
       StringBuilder errors) {
     String value = rawText == null ? "" : rawText.trim();
 
-    // 1. No vacío
     if (value.isEmpty()) {
       logger.warn("Intento de dejar vacío el campo {}", fieldName);
       errors.append(fieldName).append(" es un valor obligatorio.\n");
       return false;
     }
 
-    // 2. Solo dígitos (sin signo, sin decimales, sin espacios)
     if (!value.matches("\\d+")) {
       logger.error("Valor '{}' para {} no es un entero válido", value, fieldName);
       errors.append(fieldName).append(" debe ser un valor numérico entero.\n");
       return false;
     }
 
-    // 3. Longitud máxima ANTES de parsear -> evita overflow
     if (value.length() > maxDigits) {
       logger.warn("Valor '{}' para {} supera los {} dígitos", value, fieldName, maxDigits);
       errors.append(fieldName)
@@ -311,7 +270,6 @@ public class RoomFormController {
       return false;
     }
 
-    // Ahora es 100% seguro hacer Integer.parseInt
     return true;
   }
 
@@ -336,7 +294,6 @@ public class RoomFormController {
       }
     }
 
-    // ---- Tipo de habitación ----
     if (comboType.getValue() == null) {
       logger.warn("Intento de no insertar ningun tipo de habitación");
       errors.append("Seleccione un tipo de habitación.\n");
@@ -351,13 +308,11 @@ public class RoomFormController {
       }
     }
 
-    // ---- Vista ----
     if (comboView.getValue() == null) {
       logger.warn("Intento de no insertar vista");
       errors.append("Seleccione una vista.\n");
     }
 
-    // ---- Precio ----
     if (txtPrice.getText().trim().isEmpty()) {
       logger.warn("Intento de no insertar precio");
       errors.append("El precio es obligatorio.\n");
@@ -388,10 +343,6 @@ public class RoomFormController {
     }
     return true;
   }
-
-  // ============================================================
-  // UI HELPERS
-  // ============================================================
 
   private void closeWindow() {
     Stage stage = (Stage) btnCancel.getScene().getWindow();

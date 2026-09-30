@@ -10,46 +10,62 @@ import javafx.stage.Stage;
 
 public class LoginController {
 
-    @FXML private TextField txtUsername;
-    @FXML private PasswordField txtPassword;
-    @FXML private Label lblError;
-    @FXML private Button btnLogin;
-    @FXML private Button btnCancel;
+  @FXML
+  private TextField txtUsername;
+  @FXML
+  private PasswordField txtPassword;
+  @FXML
+  private Label lblError;
+  @FXML
+  private Button btnLogin;
+  @FXML
+  private Button btnCancel;
 
-    @FXML
-    public void initialize() {
+  @FXML
+  public void initialize() {
 
-        btnLogin.setOnAction(e -> attemptLogin());
+    btnLogin.setOnAction(e -> attemptLogin());
 
-        btnCancel.setOnAction(e -> {
-            Stage stage = (Stage) btnCancel.getScene().getWindow();
-            stage.setUserData(false);
-            stage.close();
-        });
+    btnCancel.setOnAction(e -> {
+      Stage stage = (Stage) btnCancel.getScene().getWindow();
+      stage.setUserData(false);
+      stage.close();
+    });
 
-        txtPassword.setOnAction(e -> attemptLogin());
+    txtPassword.setOnAction(e -> attemptLogin());
+
+    // Ocultar el label de error al arrancar
+    lblError.setVisible(false);
+    lblError.setManaged(false);
+  }
+
+  private void attemptLogin() {
+
+    String user = txtUsername.getText().trim();
+    String pass = txtPassword.getText();
+
+    if (user.isEmpty() || pass.isEmpty()) {
+      showError("Completá usuario y contraseña");
+      return;
     }
 
-    private void attemptLogin() {
+    boolean ok = LoginManager.getInstance().login(user, pass);
 
-        String user = txtUsername.getText().trim();
-        String pass = txtPassword.getText();
-
-        if (user.isEmpty() || pass.isEmpty()) {
-            lblError.setText("Completá usuario y contraseña");
-            return;
-        }
-
-        boolean ok = LoginManager.getInstance().login(user, pass);
-
-        if (!ok) {
-            lblError.setText("Usuario o contraseña incorrectos");
-            txtPassword.clear();
-            return;
-        }
-
-        Stage stage = (Stage) btnLogin.getScene().getWindow();
-        stage.setUserData(true);
-        stage.close();
+    if (!ok) {
+      showError("Usuario o contraseña incorrectos");
+      txtPassword.clear();
+      return;
     }
+
+    Stage stage = (Stage) btnLogin.getScene().getWindow();
+    stage.setUserData(true);
+    stage.close();
+  }
+
+  private void showError(String message) {
+    lblError.setText(message);
+    lblError.setVisible(true);
+    lblError.setManaged(true);
+  }
+
 }

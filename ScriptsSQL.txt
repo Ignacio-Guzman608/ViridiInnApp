@@ -186,10 +186,10 @@ CREATE TABLE Reservation (
 
 CREATE TABLE ReservationRoom (
     idReservation INT NOT NULL,
-    roomNumber INT NOT NULL,
-    PRIMARY KEY (idReservation, roomNumber),
+    idRoom INT NOT NULL,
+    PRIMARY KEY (idReservation, idRoom),
     FOREIGN KEY (idReservation) REFERENCES Reservation(idReservation),
-    FOREIGN KEY (roomNumber) REFERENCES Room(number)
+    FOREIGN KEY (idRoom) REFERENCES Room(idRoom) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE Staff (
@@ -901,60 +901,57 @@ VALUES
 ('049', 'Amelia',    'Cisneros',     '40789012', '2001-07-19', '11-4567-8949', 'amelia.cisneros@hotel.com',    'Av. Santa Fe',     '3900', 'CABA',          7, 5, 3, 'ACTIVE', '2024-04-01', '22:00:00', '06:00:00', 950000.00),
 ('050', 'Dylan',     'Espinoza',     '37234567', '1997-03-05', '11-4567-8950', 'dylan.espinoza@hotel.com',     'Av. Cabildo',      '3200', 'CABA',          4, 3, 3, 'ACTIVE', '2021-12-01', '22:00:00', '06:00:00', 830000.00);
 
--- ==========================================
--- RESERVATION <-> ROOM  (link reserva-habitación)
--- ==========================================
-INSERT INTO ReservationRoom (idReservation, roomNumber) VALUES
-( 1, 101),  -- 09/15-09/18  2p  simple
-( 2, 105),  -- 09/16-09/20  3p  doble cap 3
-( 3, 102),  -- 09/17-09/19  2p  simple
-( 4, 107),  -- 09/18-09/22  4p  doble cap 4
-( 5, 103),  -- 09/19-09/21  1p  simple
-( 6, 104),  -- 09/20-09/24  2p  simple
-( 7, 108),  -- 09/21-09/25  4p  doble cap 4
-( 8, 109),  -- 09/22-09/24  2p  (cancelada)
-( 9, 201),  -- 09/23-09/26  2p  simple
-(10, 106),  -- 09/24-09/28  3p  doble cap 3
-(11, 202),  -- 09/25-09/27  2p  simple
-(12, 203),  -- 09/26-09/30  4p  doble cap 4
-(13, 301),  -- 09/27-09/29  2p  simple
-(14, 204),  -- 09/28-10/02  3p  doble
-(15, 302),  -- 09/29-10/01  1p  (cancelada)
-(16, 401),  -- 09/30-10/04  2p  simple
-(17, 205),  -- 10/01-10/05  4p  doble
-(18, 402),  -- 10/02-10/04  2p  simple
-(19, 206),  -- 10/03-10/06  3p  doble
-(20, 303),  -- 10/04-10/08  2p  doble
-(21, 304),  -- 10/05-10/09  2p  doble
-(22, 207),  -- 10/06-10/08  2p  (finalizada)
-(23, 208),  -- 10/07-10/11  4p  doble
-(24, 305),  -- 10/08-10/10  2p  (cancelada)
-(25, 403),  -- 10/09-10/12  1p  doble
-(26, 306),  -- 10/10-10/14  3p  doble
-(27, 307),  -- 10/11-10/15  2p  (finalizada)
-(28, 404),  -- 10/12-10/14  2p  doble
-(29, 405),  -- 10/13-10/17  4p  doble
-(30, 406),  -- 10/14-10/16  2p  doble
-(31, 407),  -- 10/15-10/19  2p  doble
-(32, 408),  -- 10/16-10/18  3p  (finalizada)
-(33, 501),  -- 10/17-10/20  2p  doble
-(34, 502),  -- 10/18-10/22  4p  doble
-(35, 503),  -- 10/19-10/21  1p  (cancelada)
-(36, 504),  -- 10/20-10/24  2p  doble
-(37, 505),  -- 10/21-10/23  2p  doble
-(38, 506),  -- 10/22-10/26  3p  doble
-(39, 507),  -- 10/23-10/27  4p  doble
-(40, 508),  -- 10/24-10/26  2p  doble
-(41, 209),  -- 10/25-10/29  2p  familiar
-(42, 309),  -- 10/26-10/28  2p  (finalizada)
-(43, 409),  -- 10/27-10/31  4p  familiar
-(44, 509),  -- 10/28-10/30  2p  (cancelada)
-(45, 304),  -- 10/29-11/02  3p  reutiliza 304 (ya libre)
-(46, 305),  -- 10/30-11/03  2p  reutiliza 305
-(47, 403),  -- 10/31-11/02  2p  reutiliza 403
-(48, 404),  -- 11/01-11/05  4p  reutiliza 404
-(49, 405),  -- 11/02-11/04  2p  reutiliza 405
-(50, 406);  -- 11/03-11/07  1p  reutiliza 406
+INSERT INTO ReservationRoom (idReservation, idRoom) VALUES
+( 1,  1),  -- hab 101
+( 2,  5),  -- hab 105
+( 3,  2),  -- hab 102
+( 4,  7),  -- hab 107
+( 5,  3),  -- hab 103
+( 6,  4),  -- hab 104
+( 7,  8),  -- hab 108
+( 8,  9),  -- hab 109
+( 9, 10),  -- hab 201
+(10,  6),  -- hab 106
+(11, 11),  -- hab 202
+(12, 12),  -- hab 203
+(13, 19),  -- hab 301
+(14, 13),  -- hab 204
+(15, 20),  -- hab 302
+(16, 28),  -- hab 401
+(17, 14),  -- hab 205
+(18, 29),  -- hab 402
+(19, 15),  -- hab 206
+(20, 21),  -- hab 303
+(21, 22),  -- hab 304
+(22, 16),  -- hab 207
+(23, 17),  -- hab 208
+(24, 23),  -- hab 305
+(25, 30),  -- hab 403
+(26, 24),  -- hab 306
+(27, 25),  -- hab 307
+(28, 31),  -- hab 404
+(29, 32),  -- hab 405
+(30, 33),  -- hab 406
+(31, 34),  -- hab 407
+(32, 35),  -- hab 408
+(33, 37),  -- hab 501
+(34, 38),  -- hab 502
+(35, 39),  -- hab 503
+(36, 40),  -- hab 504
+(37, 41),  -- hab 505
+(38, 42),  -- hab 506
+(39, 43),  -- hab 507
+(40, 44),  -- hab 508
+(41, 18),  -- hab 209
+(42, 27),  -- hab 309
+(43, 36),  -- hab 409
+(44, 45),  -- hab 509
+(45, 22),  -- hab 304 (reutiliza)
+(46, 23),  -- hab 305 (reutiliza)
+(47, 30),  -- hab 403 (reutiliza)
+(48, 31),  -- hab 404 (reutiliza)
+(49, 32),  -- hab 405 (reutiliza)
+(50, 33);  -- hab 406 (reutiliza)
 
 -- ==========================================
 -- FIN DEL SCRIPT

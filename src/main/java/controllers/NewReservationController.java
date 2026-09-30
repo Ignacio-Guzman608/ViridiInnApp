@@ -251,7 +251,7 @@ public class NewReservationController {
     selectedRooms.clear();
     for (ReservationRoom rr : reservationRooms) {
       for (Room room : activeRooms) {
-        if (room.getNumber() == rr.getRoomNumber()) {
+        if (room.getNumber() == rr.getIdRoom()) {
           selectedRooms.add(room);
           break;
         }
@@ -693,7 +693,7 @@ public class NewReservationController {
             ? reservationToEdit.getIdReservation()
             : null;
 
-    List<Integer> occupiedRooms = reservationRoomRepo.getOccupiedRoomNumbers(
+    List<Integer> occupiedRooms = reservationRoomRepo.getOccupiedRoomIds(
             dpCheckIn.getValue(), dpCheckOut.getValue(), idReservationToExclude);
 
     availableRooms.clear();

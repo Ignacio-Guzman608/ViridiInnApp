@@ -276,7 +276,7 @@ public class CustomerHistoryController {
             for (ReservationRoom rr : all) {
                 roomsByReservation
                         .computeIfAbsent(rr.getIdReservation(), k -> new ArrayList<>())
-                        .add(rr.getRoomNumber());
+                        .add(rr.getIdRoom());
             }
 
             System.out.println("Room assignments loaded: " + all.size());

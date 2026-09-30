@@ -20,14 +20,14 @@ public class RoomOccupancyDAO {
         Map<Integer, List<OccupiedInterval>> result = new HashMap<>();
 
         String sql =
-            "SELECT rr.roomNumber, r.checkIn, r.checkOut " +
+            "SELECT rr.idRoom, r.checkIn, r.checkOut " +
             "FROM ReservationRoom rr " +
             "JOIN Reservation r        ON rr.idReservation = r.idReservation " +
             "JOIN ReservationStatus rs ON r.idReservationStatus = rs.idReservationStatus " +
             "WHERE r.checkOut > ? " +
             "  AND r.checkIn  < ? " +
             "  AND LOWER(rs.name) <> 'cancelada' " +
-            "ORDER BY rr.roomNumber, r.checkIn";
+            "ORDER BY rr.idRoom, r.checkIn";
 
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -37,7 +37,7 @@ public class RoomOccupancyDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    int roomNumber = rs.getInt("roomNumber");
+                    int roomNumber = rs.getInt("idRoom");
                     LocalDate from = rs.getDate("checkIn").toLocalDate();
                     LocalDate to   = rs.getDate("checkOut").toLocalDate();
 

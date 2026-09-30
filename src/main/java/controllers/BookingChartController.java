@@ -153,9 +153,6 @@ public class BookingChartController {
     createBookingGrid();
   }
 
-  // =================================================================
-  // GRID PRINCIPAL
-  // =================================================================
   private void createBookingGrid() {
 
     gridContainer.getChildren().clear();
@@ -184,7 +181,6 @@ public class BookingChartController {
     lblMonth.setText(yearMonth.getMonth().toString() + " " + currentYear);
 
     boolean isFortnight = currentViewMode != ViewMode.FULL_MONTH;
-
     double availableWidth = scrollPane.getWidth();
     double roomColumnWidth = 55;
 
@@ -196,11 +192,8 @@ public class BookingChartController {
       dayWidth = 35;
     }
 
-    // -------------------------------------------------------------
     // HEADER
-    // -------------------------------------------------------------
     HBox headerRow = new HBox();
-
     Label roomHeader = new Label("ROOM");
     roomHeader.setPrefWidth(55);
     roomHeader.setPrefHeight(45);
@@ -208,9 +201,7 @@ public class BookingChartController {
     headerRow.getChildren().add(roomHeader);
 
     for (int day = startDay; day <= endDay; day++) {
-
       LocalDate date = yearMonth.atDay(day);
-
       String dayOfWeek = switch (date.getDayOfWeek()) {
         case MONDAY -> "MON";
         case TUESDAY -> "TUE";
@@ -230,7 +221,6 @@ public class BookingChartController {
 
       Label dayName = new Label(dayOfWeek);
       dayName.setStyle("-fx-font-size: 9px;");
-
       Label dayNumber = new Label(String.valueOf(day));
       dayNumber.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
 
@@ -240,43 +230,39 @@ public class BookingChartController {
 
     gridContainer.getChildren().add(headerRow);
 
-    // -------------------------------------------------------------
-    // CARGA + ÍNDICES (una sola vez)
-    // -------------------------------------------------------------
+    // CARGA + ÍNDICES
     List<Room> rooms = roomDAO.listActive();
     List<Reservation> reservations = reservationRepo.getReservations();
     List<ReservationRoom> reservationRooms = reservationRoomRepo.getAll();
 
-    // Map<idReservation, Set<roomNumber>>
+    // Map<idReservation, Set<idRoom>>
     Map<Integer, Set<Integer>> roomsByReservation = new HashMap<>();
     for (ReservationRoom rr : reservationRooms) {
       roomsByReservation
           .computeIfAbsent(rr.getIdReservation(), k -> new HashSet<>())
-          .add(rr.getRoomNumber());
+          .add(rr.getIdRoom());
     }
 
-    // Map<roomNumber, List<Reservation>> (solo activas, excluye canceladas)
+    // Map<idRoom, List<Reservation>>
     Map<Integer, List<Reservation>> reservationsByRoom = new HashMap<>();
     for (Reservation r : reservations) {
       if (r.getIdReservationStatus() == 3)
-        continue; // cancelada
-      Set<Integer> roomNums = roomsByReservation.get(r.getIdReservation());
-      if (roomNums == null)
         continue;
-      for (Integer roomNum : roomNums) {
+      Set<Integer> roomIds = roomsByReservation.get(r.getIdReservation());
+      if (roomIds == null)
+        continue;
+      for (Integer roomId : roomIds) {
         reservationsByRoom
-            .computeIfAbsent(roomNum, k -> new ArrayList<>())
+            .computeIfAbsent(roomId, k -> new ArrayList<>())
             .add(r);
       }
     }
 
-    // -------------------------------------------------------------
-    // FILAS POR HABITACIÓN
-    // -------------------------------------------------------------
+    // FILAS
     for (Room room : rooms) {
 
       HBox roomRow = new HBox();
-      roomRow.setUserData(room.getNumber());
+      roomRow.setUserData(room.getNumber()); // se mantiene number para selección
       roomRow.setMaxWidth(Double.MAX_VALUE);
       roomRow.getStyleClass().add("room-row");
       roomRow.setPrefHeight(22);
@@ -290,13 +276,14 @@ public class BookingChartController {
       roomLabel.getStyleClass().add("room-label");
       roomRow.getChildren().add(roomLabel);
 
-      List<Reservation> roomReservations = reservationsByRoom.getOrDefault(room.getNumber(), Collections.emptyList());
+      // 🔥 FIX: usar idRoom para buscar en el mapa de reservas
+      List<Reservation> roomReservations = reservationsByRoom.getOrDefault(room.getIdRoom(), Collections.emptyList());
 
       for (int day = startDay; day <= endDay;) {
 
         LocalDate currentDate = yearMonth.atDay(day);
-
         Reservation currentReservation = null;
+
         for (Reservation reservation : roomReservations) {
           boolean occupied = !currentDate.isBefore(reservation.getCheckIn())
               && currentDate.isBefore(reservation.getCheckOut());
@@ -306,12 +293,8 @@ public class BookingChartController {
           }
         }
 
-        // -------------------------------------------------
-        // HAY RESERVA → bookingBlock
-        // -------------------------------------------------
         if (currentReservation != null) {
 
-          // cuántos días de esta reserva caen dentro de la vista
           LocalDate visibleStart = currentReservation.getCheckIn().isBefore(yearMonth.atDay(startDay))
               ? yearMonth.atDay(startDay)
               : currentReservation.getCheckIn();
@@ -321,10 +304,8 @@ public class BookingChartController {
               : currentReservation.getCheckOut();
 
           int numberOfDays = (int) ChronoUnit.DAYS.between(visibleStart, visibleEndExclusive);
-
-          if (numberOfDays <= 0) {
-            numberOfDays = 1; // por las dudas
-          }
+          if (numberOfDays <= 0)
+            numberOfDays = 1;
 
           double blockWidth = (dayWidth * numberOfDays) - 8;
 
@@ -392,12 +373,8 @@ public class BookingChartController {
           reservationContainer.getChildren().add(bookingBlock);
 
           roomRow.getChildren().add(reservationContainer);
-
           day += numberOfDays;
 
-          // -------------------------------------------------
-          // CELDA VACÍA
-          // -------------------------------------------------
         } else {
 
           VBox emptyCell = new VBox();
@@ -414,15 +391,13 @@ public class BookingChartController {
               && selectedStartDate != null
               && Objects.equals(room.getNumber(), selectedRoomNumber)
               && !currentDate.isBefore(selectedStartDate)
-              && (selectedEndDate == null
-                  || !currentDate.isAfter(selectedEndDate));
+              && (selectedEndDate == null || !currentDate.isAfter(selectedEndDate));
 
           if (isSelected) {
             emptyCell.getStyleClass().add("selected-cell");
           }
 
           emptyCell.setOnMouseClicked(event -> {
-
             if (selectedBookingBlock != null) {
               selectedBookingBlock.getStyleClass().remove("selected-block");
               selectedBookingBlock = null;
@@ -432,31 +407,22 @@ public class BookingChartController {
             LocalDate selectedDate = currentDate;
 
             if (selectedStartDate == null || selectedRoomNumber == null) {
-
               selectedRoomNumber = room.getNumber();
               selectedStartDate = selectedDate;
               selectedEndDate = null;
-
             } else if (!Objects.equals(selectedRoomNumber, room.getNumber())) {
-
               clearDateSelection();
-
               selectedRoomNumber = room.getNumber();
               selectedStartDate = selectedDate;
-
             } else if (selectedEndDate == null) {
-
               if (selectedDate.isBefore(selectedStartDate)) {
                 selectedEndDate = selectedStartDate;
                 selectedStartDate = selectedDate;
               } else {
                 selectedEndDate = selectedDate;
               }
-
             } else {
-
               clearDateSelection();
-
               selectedRoomNumber = room.getNumber();
               selectedStartDate = selectedDate;
             }
@@ -473,9 +439,6 @@ public class BookingChartController {
     }
   }
 
-  // =================================================================
-  // SELECCIÓN
-  // =================================================================
   private void clearDateSelection() {
 
     selectedRoomNumber = null;

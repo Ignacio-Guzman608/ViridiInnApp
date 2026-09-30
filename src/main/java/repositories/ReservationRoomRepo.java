@@ -16,13 +16,13 @@ public class ReservationRoomRepo {
   // CREATE
   // ============================================================
   public void create(ReservationRoom reservationRoom) {
-    String sql = "INSERT INTO ReservationRoom (idReservation, roomNumber) VALUES (?, ?)";
+    String sql = "INSERT INTO ReservationRoom (idReservation, idRoom) VALUES (?, ?)";
 
     try (Connection conn = ConexionDB.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
 
       ps.setInt(1, reservationRoom.getIdReservation());
-      ps.setInt(2, reservationRoom.getRoomNumber());
+      ps.setInt(2, reservationRoom.getIdRoom());
       ps.executeUpdate();
 
     } catch (SQLException e) {
@@ -31,11 +31,11 @@ public class ReservationRoomRepo {
   }
 
   public void create(Connection conn, ReservationRoom reservationRoom) {
-    String sql = "INSERT INTO ReservationRoom (idReservation, roomNumber) VALUES (?, ?)";
+    String sql = "INSERT INTO ReservationRoom (idReservation, idRoom) VALUES (?, ?)";
 
     try (PreparedStatement ps = conn.prepareStatement(sql)) {
       ps.setInt(1, reservationRoom.getIdReservation());
-      ps.setInt(2, reservationRoom.getRoomNumber());
+      ps.setInt(2, reservationRoom.getIdRoom());
       ps.executeUpdate();
 
     } catch (SQLException e) {
@@ -50,7 +50,7 @@ public class ReservationRoomRepo {
   public List<ReservationRoom> getByReservation(int idReservation) {
     List<ReservationRoom> rooms = new ArrayList<>();
 
-    String sql = "SELECT idReservation, roomNumber FROM ReservationRoom WHERE idReservation = ?";
+    String sql = "SELECT idReservation, idRoom FROM ReservationRoom WHERE idReservation = ?";
 
     try (Connection conn = ConexionDB.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -61,7 +61,7 @@ public class ReservationRoomRepo {
         while (rs.next()) {
           ReservationRoom rr = new ReservationRoom(
               rs.getInt("idReservation"),
-              rs.getInt("roomNumber"));
+              rs.getInt("idRoom"));
           rooms.add(rr);
         }
       }
@@ -80,21 +80,21 @@ public class ReservationRoomRepo {
    */
   public List<ReservationRoom> getAll() {
     List<ReservationRoom> list = new ArrayList<>();
-    String sql = "SELECT idReservation, roomNumber FROM ReservationRoom";
+    String sql = "SELECT idReservation, idRoom FROM ReservationRoom";
 
     try (Connection conn = ConexionDB.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery()) {
 
       while (rs.next()) {
         list.add(new ReservationRoom(
-                rs.getInt("idReservation"),
-                rs.getInt("roomNumber")));
+            rs.getInt("idReservation"),
+            rs.getInt("idRoom")));
       }
 
     } catch (SQLException e) {
       throw new RuntimeException(
-              "Error al obtener las habitaciones de las reservas", e);
+          "Error al obtener las habitaciones de las reservas", e);
     }
 
     return list;
@@ -129,13 +129,13 @@ public class ReservationRoomRepo {
    * @param idReservationToExclude reserva que se está editando (se excluye para
    *                               no chocar consigo misma)
    */
-  public List<Integer> getOccupiedRoomNumbers(LocalDate checkIn,
+  public List<Integer> getOccupiedRoomIds(LocalDate checkIn,
       LocalDate checkOut,
       Integer idReservationToExclude) {
     List<Integer> occupiedRooms = new ArrayList<>();
 
     String sql = """
-        SELECT DISTINCT rr.roomNumber
+        SELECT DISTINCT rr.idRoom
         FROM ReservationRoom rr
         JOIN Reservation r        ON rr.idReservation = r.idReservation
         JOIN ReservationStatus rs ON r.idReservationStatus = rs.idReservationStatus
@@ -161,7 +161,7 @@ public class ReservationRoomRepo {
 
       try (ResultSet rs = ps.executeQuery()) {
         while (rs.next()) {
-          occupiedRooms.add(rs.getInt("roomNumber"));
+          occupiedRooms.add(rs.getInt("idRoom"));
         }
       }
 

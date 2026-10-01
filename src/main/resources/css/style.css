@@ -83,7 +83,7 @@
     -fx-text-fill: white;
     -fx-font-size: 25px;
     -fx-cursor: hand;
-    -fx-padding: 4 8;
+    -fx-padding: 12 15;
 }
 
 .hamburger-button:hover {

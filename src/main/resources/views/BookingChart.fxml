@@ -1,77 +1,188 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.control.ToggleButton?>
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controllers.BookingChartController"
             styleClass="planilla-container">
 
-    <!-- HEADER -->
+    <!-- ===================================================== -->
+    <!-- TOOLBAR -->
+    <!-- ===================================================== -->
+
     <top>
+
         <HBox spacing="15"
               alignment="CENTER_LEFT"
-              styleClass="planilla-header">
+              styleClass="top-toolbar">
 
             <padding>
-                <Insets top="15" right="20" bottom="15" left="20"/>
+                <Insets top="12"
+                        right="20"
+                        bottom="12"
+                        left="20"/>
             </padding>
 
-            <Button text="‹"
-                    fx:id="btnPreviousMonth"
-                    styleClass="month-button"/>
+            <!-- NAVEGACIÓN DEL MES -->
 
-            <Label fx:id="lblMonth"
-                   text="SEPTIEMBRE 2026"
-                   styleClass="month-title"/>
+            <HBox spacing="8"
+                  alignment="CENTER_LEFT">
 
-            <Button text="›"
-                    fx:id="btnNextMonth"
-                    styleClass="month-button"/>
+                <Button text="‹"
+                        fx:id="btnPreviousMonth"
+                        styleClass="nav-arrow-btn"/>
 
-            <ToggleButton fx:id="btnFullMonth"
-                          text="MES COMPLETO"
-                          styleClass="view-button"/>
+                <Label fx:id="lblMonth"
+                       text="OCTUBRE 2026"
+                       styleClass="month-label"/>
 
-            <ToggleButton fx:id="btnFirstFortnight"
-                          text="1° QUINCENA"
-                          styleClass="view-button"/>
+                <Button text="›"
+                        fx:id="btnNextMonth"
+                        styleClass="nav-arrow-btn"/>
 
-            <ToggleButton fx:id="btnSecondFortnight"
-                          text="2° QUINCENA"
-                          styleClass="view-button"/>
+            </HBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- VISTAS -->
+
+            <HBox spacing="3"
+                  alignment="CENTER"
+                  styleClass="segmented-control">
+
+                <ToggleButton fx:id="btnFullMonth"
+                              text="MES COMPLETO"
+                              styleClass="filter-btn"/>
+
+                <ToggleButton fx:id="btnFirstFortnight"
+                              text="1° QUINCENA"
+                              styleClass="filter-btn"/>
+
+                <ToggleButton fx:id="btnSecondFortnight"
+                              text="2° QUINCENA"
+                              styleClass="filter-btn"/>
+
+                <ToggleButton fx:id="btnLastFirstFortnight"
+                              text="2° + 1° QUINCENAS"
+                              styleClass="filter-btn"/>
+
+            </HBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- NUEVA RESERVA -->
 
             <Button fx:id="btnNewReservation"
                     text="NUEVA RESERVA"
-                    styleClass="view-button"/>
+                    styleClass="btn-nueva-reserva"/>
 
         </HBox>
+
     </top>
 
-    <!-- GRID AREA -->
+
+    <!-- ===================================================== -->
+    <!-- PLANILLA -->
+    <!-- ===================================================== -->
+
     <center>
-        <ScrollPane fx:id="scrollPane"
-                    fitToHeight="true"
-                    fitToWidth="false"
-                    hbarPolicy="AS_NEEDED"
-                    vbarPolicy="AS_NEEDED"
-                    styleClass="planilla-scroll">
 
-            <VBox fx:id="gridContainer"
-                  spacing="0"
-                  maxWidth="Infinity"
-                  styleClass="planilla-grid">
+        <VBox styleClass="booking-chart-area">
 
-            </VBox>
+            <!-- ================================================= -->
+            <!-- HEADER FIJO -->
+            <!-- ================================================= -->
 
-        </ScrollPane>
+            <HBox styleClass="calendar-header-row">
+
+                <!-- HEADER ROOM -->
+
+                <Label fx:id="fixedRoomHeader"
+                       text="ROOM"
+                       styleClass="corner-header"
+                       prefWidth="55"
+                       minWidth="55"
+                       maxWidth="55"/>
+
+
+                <!-- HEADER DÍAS -->
+
+                <ScrollPane fx:id="headerScrollPane"
+                            fitToHeight="true"
+                            fitToWidth="false"
+                            hbarPolicy="NEVER"
+                            vbarPolicy="NEVER"
+                            styleClass="header-scroll"
+                            HBox.hgrow="ALWAYS">
+
+                    <HBox fx:id="fixedDayHeader"
+                          spacing="0"
+                          styleClass="booking-fixed-header"/>
+
+                </ScrollPane>
+
+            </HBox>
+
+
+            <!-- ================================================= -->
+            <!-- CUERPO -->
+            <!-- ================================================= -->
+
+            <HBox VBox.vgrow="ALWAYS">
+
+                <!-- ============================================= -->
+                <!-- COLUMNA FIJA DE HABITACIONES -->
+                <!-- ============================================= -->
+
+                <ScrollPane fx:id="roomScrollPane"
+                            fitToWidth="false"
+                            fitToHeight="false"
+                            hbarPolicy="NEVER"
+                            vbarPolicy="NEVER"
+                            styleClass="room-scroll"
+                            prefWidth="55"
+                            minWidth="55"
+                            maxWidth="55">
+
+                    <VBox fx:id="roomColumn"
+                          spacing="0"
+                          styleClass="room-column"/>
+
+                </ScrollPane>
+
+
+                <!-- ============================================= -->
+                <!-- CALENDARIO -->
+                <!-- ============================================= -->
+
+                <ScrollPane fx:id="scrollPane"
+                            fitToHeight="true"
+                            fitToWidth="false"
+                            hbarPolicy="AS_NEEDED"
+                            vbarPolicy="AS_NEEDED"
+                            styleClass="planilla-scroll"
+                            HBox.hgrow="ALWAYS">
+
+                    <VBox fx:id="gridContainer"
+                          spacing="0"
+                          styleClass="planilla-grid"/>
+
+                </ScrollPane>
+
+            </HBox>
+
+        </VBox>
+
     </center>
 
 </BorderPane>
+

@@ -171,6 +171,11 @@ public class DashboardController {
 
       Object controller = loader.getController();
 
+      if (controller instanceof BookingChartController) {
+        ((BookingChartController) controller)
+                .setDashboardController(this);
+      }
+
       if (controller instanceof ReservationsController) {
         ((ReservationsController) controller).setDashboardController(this);
       }
@@ -210,6 +215,34 @@ public class DashboardController {
       controller.setReservationToEdit(reservation);
 
       // Colocar la vista exactamente igual que las demás
+      centerPane.getChildren().setAll(view);
+
+      AnchorPane.setTopAnchor(view, 0.0);
+      AnchorPane.setBottomAnchor(view, 0.0);
+      AnchorPane.setLeftAnchor(view, 0.0);
+      AnchorPane.setRightAnchor(view, 0.0);
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void loadNewReservation() {
+    selectSidebarButton("reservas");
+
+    try {
+
+      FXMLLoader loader = new FXMLLoader(
+              getClass().getResource("/views/NewReservation.fxml")
+      );
+
+      Parent view = loader.load();
+
+      NewReservationController controller =
+              loader.getController();
+
+      controller.setDashboardController(this);
+
       centerPane.getChildren().setAll(view);
 
       AnchorPane.setTopAnchor(view, 0.0);

@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 public class ReservationsController {
 
+
   private static final int MAX_RESERVAS_VISIBLES = 100;
 
   private final ReservationRepo reservationRepo;
@@ -40,6 +41,9 @@ public class ReservationsController {
 
   // Cache idReservation -> [roomNumber, ...]
   private final Map<Integer, List<Integer>> roomsByReservation = new HashMap<>();
+
+  @FXML
+  private SplitPane splitPaneReservations;
 
   // ---- TABLA ----
   @FXML
@@ -135,6 +139,22 @@ public class ReservationsController {
     btnViewMore.setDisable(true);
     btnEditReservation.setDisable(true);
     btnReservationConsumptions.setDisable(true);
+
+    splitPaneReservations.getDividers().get(0)
+            .positionProperty()
+            .addListener((obs, oldValue, newValue) -> {
+
+              double position = newValue.doubleValue();
+
+              double min = 0.55;
+              double max = 0.82;
+
+              if (position < min) {
+                splitPaneReservations.setDividerPosition(0, min);
+              } else if (position > max) {
+                splitPaneReservations.setDividerPosition(0, max);
+              }
+            });
   }
 
   // ============================================================

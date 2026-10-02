@@ -23,17 +23,13 @@
     <VBox
             spacing="15"
             styleClass="content-main"
+            AnchorPane.topAnchor="0"
             AnchorPane.bottomAnchor="0"
             AnchorPane.leftAnchor="0"
-            AnchorPane.rightAnchor="0"
-            AnchorPane.topAnchor="0">
+            AnchorPane.rightAnchor="0">
 
         <padding>
-            <Insets
-                    top="20"
-                    right="20"
-                    bottom="20"
-                    left="20"/>
+            <Insets top="20" right="20" bottom="20" left="20"/>
         </padding>
 
         <!-- TÍTULO Y NUEVA RESERVA -->
@@ -60,8 +56,8 @@
                     text="Nueva reserva"
                     styleClass="btn-primary"
                     onAction="#handleNewReservation"/>
-        </HBox>
 
+        </HBox>
 
         <!-- BUSCADOR Y FILTRO -->
         <HBox
@@ -81,19 +77,18 @@
 
         </HBox>
 
-
         <!-- TABLA + DETALLE -->
         <SplitPane
+                fx:id="splitPaneReservations"
                 dividerPositions="0.72"
                 styleClass="split-pane"
                 VBox.vgrow="ALWAYS">
 
             <!-- TABLA -->
             <VBox
-                    minWidth="450.0"
-                    prefWidth="700.0"
-                    maxWidth="900.0"
-                    spacing="10">
+                    minWidth="0"
+                    spacing="10"
+                    VBox.vgrow="ALWAYS">
 
                 <TableView
                         fx:id="tblReservations"
@@ -127,7 +122,11 @@
                                 prefWidth="80"
                                 text="Huéspedes"/>
 
-                        <TableColumn fx:id="colRooms" prefWidth="110" text="Habitación" />
+                        <TableColumn
+                                fx:id="colRooms"
+                                prefWidth="110"
+                                text="Habitación"/>
+
                         <TableColumn
                                 fx:id="colTotalRate"
                                 prefWidth="110"
@@ -153,24 +152,19 @@
 
             </VBox>
 
-
             <!-- PANEL DE DETALLE -->
             <ScrollPane
-                    minWidth="220.0"
-                    prefWidth="300.0"
-                    maxWidth="380.0"
+                    minWidth="0"
                     fitToWidth="true"
+                    fitToHeight="true"
                     hbarPolicy="NEVER"
                     vbarPolicy="AS_NEEDED"
-                    styleClass="detail-scroll"
-                    VBox.vgrow="ALWAYS">
+                    styleClass="detail-scroll">
 
                 <content>
 
                     <VBox
-                            maxWidth="350.0"
-                            minWidth="220.0"
-                            prefWidth="300.0"
+                            minWidth="0"
                             spacing="12"
                             styleClass="detail-panel">
 
@@ -207,8 +201,7 @@
                                 text="--"
                                 styleClass="detail-value-field"
                                 editable="false"
-                                focusTraversable="false"
-                                maxWidth="Infinity"/>
+                                focusTraversable="false"/>
 
                         <Label
                                 text="Check-in:"
@@ -219,8 +212,7 @@
                                 text="--"
                                 styleClass="detail-value-field"
                                 editable="false"
-                                focusTraversable="false"
-                                maxWidth="Infinity"/>
+                                focusTraversable="false"/>
 
                         <Label
                                 text="Check-out:"
@@ -231,8 +223,7 @@
                                 text="--"
                                 styleClass="detail-value-field"
                                 editable="false"
-                                focusTraversable="false"
-                                maxWidth="Infinity"/>
+                                focusTraversable="false"/>
 
                         <Label
                                 text="Huéspedes:"
@@ -243,8 +234,7 @@
                                 text="--"
                                 styleClass="detail-value-field"
                                 editable="false"
-                                focusTraversable="false"
-                                maxWidth="Infinity"/>
+                                focusTraversable="false"/>
 
                         <Label
                                 text="Tarifa total:"
@@ -255,8 +245,7 @@
                                 text="--"
                                 styleClass="detail-value-field"
                                 editable="false"
-                                focusTraversable="false"
-                                maxWidth="Infinity"/>
+                                focusTraversable="false"/>
 
                         <Label
                                 text="Estado:"
@@ -267,8 +256,7 @@
                                 text="--"
                                 styleClass="detail-value-field"
                                 editable="false"
-                                focusTraversable="false"
-                                maxWidth="Infinity"/>
+                                focusTraversable="false"/>
 
                         <Label
                                 text="Tipo de reserva:"
@@ -279,12 +267,10 @@
                                 text="--"
                                 styleClass="detail-value-field"
                                 editable="false"
-                                focusTraversable="false"
-                                maxWidth="Infinity"/>
+                                focusTraversable="false"/>
 
                         <Button
                                 fx:id="btnViewMore"
-                                maxWidth="Infinity"
                                 styleClass="btn-detail"
                                 text="Ver más"
                                 onAction="#handleViewMore"
@@ -292,14 +278,12 @@
 
                         <Button
                                 fx:id="btnEditReservation"
-                                maxWidth="Infinity"
                                 styleClass="btn-detail"
                                 text="Editar"
                                 onAction="#handleModifyReservation"/>
 
                         <Button
                                 fx:id="btnReservationConsumptions"
-                                maxWidth="Infinity"
                                 styleClass="btn-detail"
                                 text="🛒 Consumos"
                                 onAction="#handleReservationConsumptions"/>
@@ -315,3 +299,4 @@
     </VBox>
 
 </AnchorPane>
+

@@ -33,7 +33,6 @@ public class StaffController {
 
     // ---------- Buscador y filtro ----------
     @FXML private TextField txtSearch;
-    @FXML private ComboBox<String> comboStatusFilter;
 
     // ---------- Panel de detalle ----------
     @FXML private Label lblDetailName;
@@ -56,7 +55,6 @@ public class StaffController {
     public void initialize() {
         configurarColumnas();
         cargarDatos();
-        configurarFiltroDeEstado();
         configurarBuscador();
         configurarSeleccionDeFila();
     }
@@ -74,15 +72,10 @@ public class StaffController {
             staffList = FXCollections.observableArrayList(staffDAO.listAll());
             filteredStaffList = new FilteredList<>(staffList, s -> true);
             tableStaff.setItems(filteredStaffList);
+            aplicarFiltros(); // arranca mostrando solo Activos desde el primer momento
         } catch (SQLException e) {
             mostrarAlerta("No se pudo cargar la lista de personal: " + e.getMessage());
         }
-    }
-
-    private void configurarFiltroDeEstado() {
-        comboStatusFilter.setItems(FXCollections.observableArrayList("Todos", "Activo", "Inactivo"));
-        comboStatusFilter.setValue("Activo");
-        comboStatusFilter.setOnAction(e -> aplicarFiltros());
     }
 
     private void configurarBuscador() {
@@ -91,14 +84,11 @@ public class StaffController {
 
     private void aplicarFiltros() {
         String texto = txtSearch.getText() == null ? "" : txtSearch.getText().toLowerCase().trim();
-        String estadoSeleccionado = comboStatusFilter.getValue();
 
         filteredStaffList.setPredicate(staff -> {
-            boolean coincideEstado = switch (estadoSeleccionado) {
-                case "Activo" -> staff.getStatus() == StaffStatus.ACTIVE;
-                case "Inactivo" -> staff.getStatus() == StaffStatus.INACTIVE;
-                default -> true;
-            };
+            // La tabla principal solo muestra Activos; los inactivos solo se ven
+            // en la ventana "Eliminados" (antes "Inactivos").
+            boolean esActivo = staff.getStatus() == StaffStatus.ACTIVE;
 
             boolean coincideTexto = texto.isEmpty()
                     || staff.getFullName().toLowerCase().contains(texto)
@@ -108,7 +98,7 @@ public class StaffController {
                     || (staff.getEmail() != null && staff.getEmail().toLowerCase().contains(texto))
                     || (staff.getCity() != null && staff.getCity().toLowerCase().contains(texto));
 
-            return coincideEstado && coincideTexto;
+            return esActivo && coincideTexto;
         });
     }
 

@@ -20,7 +20,7 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controllers.StaffController">
 
-    <VBox styleClass="room-table" spacing="15"
+    <VBox styleClass="content-main" spacing="15"
           AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
           AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
         <padding>
@@ -29,27 +29,26 @@
 
         <!-- Título y botones -->
         <HBox alignment="CENTER_LEFT" spacing="15">
-            <Label text="Personal" styleClass="room-table">
+            <Label text="Personal" styleClass="section-title">
                 <font><Font size="24.0" /></font>
             </Label>
             <Region HBox.hgrow="ALWAYS" />
-            <Button fx:id="btnNewStaff" text=" Nuevo " styleClass="btn-primary"
+            <Button fx:id="btnNewStaff" text="+ Nuevo Personal" styleClass="btn-primary"
                     onAction="#handleNewStaff" />
-            <Button fx:id="btnViewHistory" text="Eliminados" styleClass="btn-secondary"
+            <Button fx:id="btnViewHistory" text="Inactivos" styleClass="btn-secondary"
                     onAction="#handleViewHistory" />
         </HBox>
 
-        <!-- Buscador y filtro -->
+        <!-- Buscador (ocupa todo el ancho; la tabla principal solo muestra Activos) -->
         <HBox spacing="15" alignment="CENTER_LEFT">
             <TextField fx:id="txtSearch" promptText="🔍 Buscar por nombre, DNI, cargo..."
                        styleClass="search-field" HBox.hgrow="ALWAYS" />
-            <ComboBox fx:id="comboStatusFilter" promptText="Estado" prefWidth="120" />
         </HBox>
 
         <!-- SplitPane: Tabla + Detalle -->
         <SplitPane dividerPositions="0.7" VBox.vgrow="ALWAYS" styleClass="split-pane">
             <VBox spacing="10">
-                <TableView fx:id="tableStaff" styleClass="customer-table" VBox.vgrow="ALWAYS">
+                <TableView fx:id="tableStaff" styleClass="staff-table" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colFullName" text="Nombre Completo" prefWidth="150" />
                         <TableColumn fx:id="colPosition" text="Cargo" prefWidth="120" />

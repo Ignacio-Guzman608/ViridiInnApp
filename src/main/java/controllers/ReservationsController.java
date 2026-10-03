@@ -311,7 +311,7 @@ public class ReservationsController {
       for (ReservationRoom rr : all) {
         roomsByReservation
             .computeIfAbsent(rr.getIdReservation(), k -> new ArrayList<>())
-            .add(rr.getIdRoom());
+            .add(rr.getRoomNumber());
       }
 
       System.out.println("Room assignments loaded: " + all.size());

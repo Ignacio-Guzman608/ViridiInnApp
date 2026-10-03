@@ -25,13 +25,7 @@ import repositories.RoomDAO;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class BookingChartController {
 
@@ -658,32 +652,35 @@ public class BookingChartController {
                 null;
 
         // ---------------------------------------------
-        // BUSCAR RESERVA
-        // ---------------------------------------------
+// BUSCAR RESERVA + SEGMENTO
+// ---------------------------------------------
 
-        for (
-                Reservation reservation :
-                roomReservations
-        ) {
+        currentReservation = null;
+        LocalDate segFrom = null;
+        LocalDate segTo = null;
 
-          boolean occupied =
-                  !currentDate.isBefore(
-                          reservation
-                                  .getCheckIn()
-                  )
-                          &&
-                          currentDate.isBefore(
-                                  reservation
-                                          .getCheckOut()
-                          );
+        for (Reservation reservation : roomReservations) {
 
-          if (occupied) {
+          // Calcular los tramos efectivos de esta habitación dentro del rango
+          List<LocalDate[]> segments = computeSegments(
+                  reservation, room.getIdRoom(), reservationsByRoom);
 
-            currentReservation =
-                    reservation;
+          for (LocalDate[] seg : segments) {
+            LocalDate from = seg[0];
+            LocalDate to   = seg[1];
 
-            break;
+            boolean occupied =
+                    !currentDate.isBefore(from) && !currentDate.isAfter(to);
+
+            if (occupied) {
+              currentReservation = reservation;
+              segFrom = from;
+              segTo   = to;
+              break;
+            }
           }
+
+          if (currentReservation != null) break;
         }
 
 // =================================================
@@ -698,21 +695,12 @@ public class BookingChartController {
                i < visibleDates.size();
                i++) {
 
-            LocalDate date =
-                    visibleDates.get(i);
+            LocalDate date = visibleDates.get(i);
 
             boolean occupied =
-                    !date.isBefore(
-                            currentReservation.getCheckIn()
-                    )
-                            &&
-                            date.isBefore(
-                                    currentReservation.getCheckOut()
-                            );
+                    !date.isBefore(segFrom) && !date.isAfter(segTo);   // 👈 usa el segmento
 
-            if (!occupied) {
-              break;
-            }
+            if (!occupied) break;
 
             reservationDays++;
           }
@@ -721,9 +709,7 @@ public class BookingChartController {
             reservationDays = 1;
           }
 
-          double reservationWidth =
-                  dayWidth * reservationDays;
-
+          double reservationWidth = dayWidth * reservationDays;
 
           // =================================================
           // CONTENEDOR QUE REPRESENTA TODA LA RESERVA
@@ -906,6 +892,24 @@ public class BookingChartController {
                             .add("finished-block");
           }
 
+          // =================================================
+          // DETECTAR HOTEL TOUR (reserva con múltiples habitaciones)
+          // =================================================
+
+          Set<Integer> reservationRoomIds =
+                  roomsByReservation.get(
+                          reservationToSelect.getIdReservation()
+                  );
+
+          boolean isHotelTour =
+                  reservationRoomIds != null
+                          && reservationRoomIds.size() > 1;
+
+          if (isHotelTour) {
+            bookingBlock
+                    .getStyleClass()
+                    .add("hotel-tour-block");
+          }
 
           // =================================================
           // CLICK PARA SELECCIONAR
@@ -1061,5 +1065,55 @@ public class BookingChartController {
             };
 
     return month + " " + yearMonth.getYear();
+  }
+
+  /**
+   * Calcula los tramos libres (segmentos) de una habitación dentro del rango
+   * de una reserva, restando la ocupación de OTRAS reservas sobre esa misma
+   * habitación.
+   *
+   * Si la reserva ocupa solo esa habitación en todo el rango, devuelve 1
+   * segmento = el rango completo (comportamiento normal).
+   * Si la reserva es un Hotel Tour (varias habitaciones), devuelve el tramo
+   * efectivo que ocupa cada una.
+   */
+  private List<LocalDate[]> computeSegments(
+          Reservation tourRes,
+          int roomId,
+          Map<Integer, List<Reservation>> reservationsByRoom) {
+
+    List<LocalDate[]> segments = new ArrayList<>();
+    LocalDate start = tourRes.getCheckIn();
+    LocalDate end   = tourRes.getCheckOut();
+
+    // Reunir bloqueos (otras reservas de la misma habitación que se solapan)
+    List<Reservation> blockers = new ArrayList<>();
+    for (Reservation r : reservationsByRoom.getOrDefault(roomId, Collections.emptyList())) {
+      if (r.getIdReservation() == tourRes.getIdReservation()) continue;
+      if (r.getCheckIn().isBefore(end) && r.getCheckOut().isAfter(start)) {
+        blockers.add(r);
+      }
+    }
+    blockers.sort(Comparator.comparing(Reservation::getCheckIn));
+
+    // Restar bloqueos del rango
+    LocalDate cursor = start;
+    for (Reservation b : blockers) {
+      if (!b.getCheckIn().isBefore(end)) break;
+
+      if (cursor.isBefore(b.getCheckIn())) {
+        LocalDate gapEnd = b.getCheckIn().isBefore(end) ? b.getCheckIn() : end;
+        if (cursor.isBefore(gapEnd)) {
+          segments.add(new LocalDate[]{cursor, gapEnd});
+        }
+      }
+      if (b.getCheckOut().isAfter(cursor)) cursor = b.getCheckOut();
+      if (!cursor.isBefore(end)) break;
+    }
+    if (cursor.isBefore(end)) {
+      segments.add(new LocalDate[]{cursor, end});
+    }
+
+    return segments;
   }
 }

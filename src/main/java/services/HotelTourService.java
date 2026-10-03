@@ -53,7 +53,7 @@ public class HotelTourService {
             if (room.getCapacity() < minCapacity) continue;
 
             List<OccupiedInterval> roomOccupied =
-                    occupied.getOrDefault(room.getNumber(), Collections.emptyList());
+                    occupied.getOrDefault(room.getIdRoom(), Collections.emptyList());
 
             List<TourSegment> roomSegments =
                     computeFreeSegments(room, roomOccupied, checkIn, checkOut);

@@ -269,24 +269,31 @@
                                 editable="false"
                                 focusTraversable="false"/>
 
+                        <!-- 👇 ESPACIADOR: absorbe el espacio libre -->
+                        <Region VBox.vgrow="ALWAYS" minHeight="20"/>
+
+                        <!-- 👇 BOTONES AL FONDO -->
                         <Button
                                 fx:id="btnViewMore"
                                 styleClass="btn-detail"
                                 text="Ver más"
                                 onAction="#handleViewMore"
-                                disable="true"/>
+                                disable="true"
+                                maxWidth="Infinity"/>
 
                         <Button
                                 fx:id="btnEditReservation"
                                 styleClass="btn-detail"
                                 text="Editar"
-                                onAction="#handleModifyReservation"/>
+                                onAction="#handleModifyReservation"
+                                maxWidth="Infinity"/>
 
                         <Button
                                 fx:id="btnReservationConsumptions"
                                 styleClass="btn-detail"
-                                text="🛒 Consumos"
-                                onAction="#handleReservationConsumptions"/>
+                                text="Consumos"
+                                onAction="#handleReservationConsumptions"
+                                maxWidth="Infinity"/>
 
                     </VBox>
 
@@ -299,4 +306,3 @@
     </VBox>
 
 </AnchorPane>
-

@@ -51,6 +51,7 @@ public class NewReservationController {
   @FXML private TableColumn<Consumption,Void> colConsumptionActions;
   @FXML private TextField txtConsumptionTotal;
   @FXML private Button btnConsumptionAction;
+  @FXML private Button btnChangeRoom;
 
   private final ObservableList<Customer> activeCustomers = FXCollections.observableArrayList();
   private Customer selectedCustomer;
@@ -83,6 +84,8 @@ public class NewReservationController {
   private List<HotelTour> availableTours = new ArrayList<>();
   private boolean loadingReservation = false;
 
+  private boolean allowRoomChange = false;
+
   private final Set<Control> touchedFields = new HashSet<>();
   private boolean roomsTouched = false;
   private Tooltip roomsValidationTooltip;
@@ -105,6 +108,11 @@ public class NewReservationController {
   @FXML
   public void initialize() {
     System.out.println("=== NewReservationController.initialize() ===");
+
+    if (btnChangeRoom != null) {
+      btnChangeRoom.setVisible(false);
+      btnChangeRoom.setManaged(false);
+    }
 
     activeRooms.setAll(roomDAO.listActive());
     loadRoomCards();
@@ -165,6 +173,9 @@ public class NewReservationController {
     });
 
     configureValidationListeners();
+
+    installDecimalFilter(txtTotalRate);
+    installDecimalFilter(txtPaymentAmount);
   }
 
   private void configureValidationListeners() {
@@ -271,7 +282,7 @@ public class NewReservationController {
       return;
     }
     try {
-      BigDecimal rate = new BigDecimal(text);
+      BigDecimal rate = new BigDecimal(normalizeDecimal(text));
       if (rate.compareTo(BigDecimal.ZERO) <= 0)
         markInvalid(txtTotalRate, "La tarifa debe ser mayor a 0.");
       else if (rate.compareTo(new BigDecimal("999999999.99")) > 0)
@@ -306,7 +317,7 @@ public class NewReservationController {
     }
 
     try {
-      BigDecimal amount = new BigDecimal(text);
+      BigDecimal amount = new BigDecimal(normalizeDecimal(text));
       if (amount.compareTo(BigDecimal.ZERO) <= 0)
         markInvalid(txtPaymentAmount, "El pago debe ser mayor a 0.");
       else clearInvalid(txtPaymentAmount);
@@ -360,7 +371,7 @@ public class NewReservationController {
     } catch (Exception e) { valid = false; }
 
     try {
-      BigDecimal rate = new BigDecimal(txtTotalRate.getText().trim());
+      BigDecimal rate = new BigDecimal(normalizeDecimal(txtTotalRate.getText()));
       if (rate.compareTo(BigDecimal.ZERO) <= 0 || rate.compareTo(new BigDecimal("999999999.99")) > 0)
         valid = false;
     } catch (Exception e) { valid = false; }
@@ -370,7 +381,7 @@ public class NewReservationController {
     String payment = txtPaymentAmount.getText().trim();
     if (!payment.isEmpty()) {
       try {
-        if (new BigDecimal(payment).compareTo(BigDecimal.ZERO) <= 0) valid = false;
+        if (new BigDecimal(normalizeDecimal(payment)).compareTo(BigDecimal.ZERO) <= 0) valid = false;
       } catch (Exception e) { valid = false; }
       if (dpPaymentDate.getValue() == null || cmbPaymentMethod.getValue() == null
               || cmbPaymentStatus.getValue() == null) valid = false;
@@ -392,6 +403,13 @@ public class NewReservationController {
     this.reservationToEdit = reservation;
     this.loadingReservation = true;
     lblReservationTitle.setText("Editar Reserva");
+
+    allowRoomChange = false;
+    if (btnChangeRoom != null) {
+      btnChangeRoom.setText("🔄 Cambiar habitación");
+      btnChangeRoom.setVisible(true);
+      btnChangeRoom.setManaged(true);
+    }
 
     if (reservation == null) {
       loadingReservation = false;
@@ -429,7 +447,7 @@ public class NewReservationController {
 
     for (ReservationRoom rr : reservationRooms) {
       for (Room room : activeRooms) {
-        if (room.getNumber() == rr.getIdRoom()) {
+        if (room.getIdRoom() == rr.getIdRoom()) {
           selectedRooms.add(room);
           break;
         }
@@ -445,6 +463,11 @@ public class NewReservationController {
     loadReservationPayment(reservation.getIdReservation());
     loadReservationConsumptions(reservation.getIdReservation());
     loadingReservation = false;
+
+    if (reservation == null && btnChangeRoom != null) {
+      btnChangeRoom.setVisible(false);
+      btnChangeRoom.setManaged(false);
+    }
   }
 
   private void loadReservationPayment(int idReservation) {
@@ -561,17 +584,20 @@ public class NewReservationController {
     }
 
     /* NORMAL RESERVATION MODE */
+
+    // 1) Cards de habitaciones disponibles
     if (!availableRooms.isEmpty()) {
-      Set<Integer> selectedNumbers = selectedRooms.stream()
-              .map(Room::getNumber)
+      Set<Integer> selectedIds = selectedRooms.stream()
+              .map(Room::getIdRoom)
               .collect(java.util.stream.Collectors.toSet());
 
       for (Room room : availableRooms) {
-        boolean selected = selectedNumbers.contains(room.getNumber());
+        boolean selected = selectedIds.contains(room.getIdRoom());
         roomsContainer.getChildren().add(createRoomCard(room, selected, false));
       }
     }
 
+    // 2) Tours de hotel
     if (!availableTours.isEmpty()) {
       Label title = new Label("🏨 Modo Hotel Tour — cambiás de habitación durante la estadía:");
       title.setStyle("-fx-text-fill: #2d6cdf; -fx-font-weight: bold; -fx-padding: 10 0 4 0;");
@@ -616,10 +642,23 @@ public class NewReservationController {
       }
     }
 
+    // 3) Mensaje cuando no hay nada para mostrar
     if (availableRooms.isEmpty() && availableTours.isEmpty()) {
-      Label placeholder = new Label(
-              "No hay habitaciones ni tours disponibles para " + requested + " huésped(es).");
+      String msg;
+
+      if (reservationToEdit != null && !allowRoomChange) {
+        msg = "La habitación asignada a esta reserva ya no está disponible. "
+                + "Tocá \"🔄 Cambiar habitación\" para elegir otra.";
+      } else if (reservationToEdit != null) {
+        msg = "No hay habitaciones libres para las fechas actuales. "
+                + "Probá cambiar las fechas o tocar \"✖ Cancelar cambio\".";
+      } else {
+        msg = "No hay habitaciones ni tours disponibles para " + requested + " huésped(es).";
+      }
+
+      Label placeholder = new Label(msg);
       placeholder.setStyle("-fx-text-fill: #888; -fx-font-style: italic; -fx-font-size: 13;");
+      placeholder.setWrapText(true);
       roomsContainer.getChildren().add(placeholder);
     }
   }
@@ -660,10 +699,10 @@ public class NewReservationController {
       }
 
       boolean isSelected = selectedRooms.stream()
-              .anyMatch(r -> r.getNumber() == room.getNumber());
+              .anyMatch(r -> r.getIdRoom() == room.getIdRoom());      // ✅
 
       if (isSelected) {
-        selectedRooms.removeIf(r -> r.getNumber() == room.getNumber());
+        selectedRooms.removeIf(r -> r.getIdRoom() == room.getIdRoom());   // ✅
         card.getStyleClass().remove("selected");
       } else {
         selectedRooms.add(room);
@@ -712,16 +751,24 @@ public class NewReservationController {
 
     if (openedFromBookingChart && selectedRoomFromChart != null) {
       for (Room room : activeRooms)
-        if (!occupiedRooms.contains(room.getNumber())) availableRooms.add(room);
+        if (!occupiedRooms.contains(room.getIdRoom())) availableRooms.add(room);
       loadRoomCards();
       return;
     }
 
+    boolean isEditMode = reservationToEdit != null && !allowRoomChange;
+
     for (Room room : activeRooms) {
-      boolean isFree = !occupiedRooms.contains(room.getNumber());
-      boolean alreadyPicked = selectedRooms.stream().anyMatch(r -> r.getNumber() == room.getNumber());
+      boolean isFree = !occupiedRooms.contains(room.getIdRoom());
+      boolean alreadyPicked = selectedRooms.stream()
+              .anyMatch(r -> r.getIdRoom() == room.getIdRoom());
       boolean hasCapacity = hasEnoughCapacity(room);
-      if ((isFree && hasCapacity) || alreadyPicked) availableRooms.add(room);
+
+      if (isEditMode) {
+        if (alreadyPicked) availableRooms.add(room);
+      } else {
+        if ((isFree && hasCapacity) || alreadyPicked) availableRooms.add(room);
+      }
     }
 
     HotelTourService.HotelTourResult result =
@@ -733,6 +780,13 @@ public class NewReservationController {
   private boolean hasEnoughCapacity(Room room) {
     int requested = getRequestedGuests();
     return requested <= 0 || room.getCapacity() >= requested;
+  }
+
+  private String normalizeDecimal(String text) {
+    if (text == null) return null;
+    return text.trim()
+            .replace(" ", "")
+            .replace(',', '.');
   }
 
   private int getRequestedGuests() {
@@ -1216,7 +1270,7 @@ public class NewReservationController {
       LocalDate checkIn = dpCheckIn.getValue();
       LocalDate checkOut = dpCheckOut.getValue();
       int numberOfGuests = Integer.parseInt(txtNumberOfGuests.getText().trim());
-      BigDecimal totalRate = new BigDecimal(txtTotalRate.getText().trim());
+      BigDecimal totalRate = new BigDecimal(normalizeDecimal(txtTotalRate.getText()));
       ReservationStatus rs = cmbReservationStatus.getValue();
       ReservationType rt = cmbReservationType.getValue();
       String reservationObs = txtReservationObservations.getText();
@@ -1231,7 +1285,7 @@ public class NewReservationController {
       String paymentObs = null;
 
       if (!paymentText.isEmpty()) {
-        paymentAmount = new BigDecimal(paymentText);
+        paymentAmount = new BigDecimal(normalizeDecimal(paymentText));
         paymentDate = dpPaymentDate.getValue().atStartOfDay();
         paymentMethod = cmbPaymentMethod.getValue();
         paymentStatus = cmbPaymentStatus.getValue();
@@ -1355,8 +1409,7 @@ public class NewReservationController {
         reservationRoomRepo.deleteByReservation(conn, idReservation);
 
       for (Room room : selectedRooms)
-        reservationRoomRepo.create(conn, new ReservationRoom(idReservation, room.getNumber()));
-
+        reservationRoomRepo.create(conn, new ReservationRoom(idReservation, room.getIdRoom()));
       conn.commit();
 
       showSuccess(
@@ -1388,6 +1441,19 @@ public class NewReservationController {
         }
       } catch (SQLException e) { e.printStackTrace(); }
     }
+  }
+
+  @FXML
+  private void handleChangeRoom() {
+    allowRoomChange = !allowRoomChange;
+
+    if (btnChangeRoom != null) {
+      btnChangeRoom.setText(allowRoomChange
+              ? "✖ Cancelar cambio"
+              : "🔄 Cambiar habitación");
+    }
+
+    loadAvailableRooms();
   }
 
   @FXML
@@ -1510,5 +1576,25 @@ public class NewReservationController {
     a.setHeaderText(null);
     a.setContentText(msg);
     a.showAndWait();
+  }
+
+  /**
+   * Instala un filtro que solo permite dígitos y una coma decimal.
+   * Bloquea letras, puntos, signos, etc.
+   */
+  private void installDecimalFilter(TextField field) {
+    if (field == null) return;
+
+    field.setTextFormatter(new javafx.scene.control.TextFormatter<>(change -> {
+      String newText = change.getControlNewText();
+
+      // Vacío: permitir (para poder borrar todo)
+      if (newText.isEmpty()) return change;
+
+      // Solo dígitos y, como máximo, una coma
+      if (!newText.matches("\\d*,?\\d*")) return null;
+
+      return change;
+    }));
   }
 }

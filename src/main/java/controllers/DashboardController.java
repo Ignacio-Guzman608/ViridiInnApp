@@ -95,26 +95,38 @@ public class DashboardController {
       loadView("/views/BookingChart.fxml");
     });
     btnReservas.setOnAction(e -> {
+      if (!ensureAuthenticated())
+        return;
       selectButton(btnReservas);
       loadView("/views/reservations.fxml");
     });
     btnHabitaciones.setOnAction(e -> {
+      if (!ensureAuthenticated())
+        return;
       selectButton(btnHabitaciones);
       loadView("/views/RoomView.fxml");
     });
     btnClientes.setOnAction(e -> {
+      if (!ensureAuthenticated())
+        return;
       selectButton(btnClientes);
       loadView("/views/CustomerView.fxml");
     });
     btnReportes.setOnAction(e -> {
+      if (!ensureAuthenticated())
+        return;
       selectButton(btnReportes);
       loadView("/views/Report.fxml");
     });
     btnPersonal.setOnAction(e -> {
+      if (!ensureAuthenticated())
+        return;
       selectButton(btnPersonal);
       loadView("/views/StaffView.fxml");
     });
     btnConfiguracion.setOnAction(e -> {
+      if (!ensureAuthenticated())
+        return;
       selectButton(btnConfiguracion);
       loadView("/views/Configuration.fxml");
     });
@@ -320,12 +332,6 @@ public class DashboardController {
     espaciadorTop.setPrefHeight(colapsada ? 50 : 0);
   }
 
-  /**
-   * Un solo botón que sirve para:
-   * - Iniciar sesión si no hay sesión activa
-   * - Cerrar sesión si ya hay alguien logueado
-   * - Mostrar aviso si el login está desactivado
-   */
   @FXML
   private void handleSessionButton() {
     LoginManager lm = LoginManager.getInstance();
@@ -343,6 +349,9 @@ public class DashboardController {
 
     if (lm.isAuthenticated()) {
       lm.logout();
+
+      selectButton(btnPlanilla);
+      loadView("/views/BookingChart.fxml");
     } else {
       LoginGuard.requireAccess();
     }
@@ -350,14 +359,11 @@ public class DashboardController {
     updateSessionUI();
   }
 
-  /**
-   * Refresca el texto del label y del botón de sesión según el estado actual.
-   */
   private void updateSessionUI() {
     LoginManager lm = LoginManager.getInstance();
 
     if (!lm.isLoginEnabled()) {
-      lblUsuario.setText("🔓 Login off");
+      lblUsuario.setText("Login off");
       btnSession.setText("Login off");
       btnSession.setDisable(true);
       return;
@@ -371,8 +377,18 @@ public class DashboardController {
       lblUsuario.setText("👤 " + nombre + " (" + rol + ")");
       btnSession.setText("Cerrar sesión");
     } else {
-      lblUsuario.setText("🔒 Sin sesión");
+      lblUsuario.setText("Sin sesión");
       btnSession.setText("Iniciar sesión");
     }
+  }
+
+  private boolean ensureAuthenticated() {
+    if (LoginGuard.requireAccess()) {
+      updateSessionUI(); // refresca label/button si acaba de loguearse
+      return true;
+    }
+
+    selectButton(btnPlanilla);
+    return false;
   }
 }

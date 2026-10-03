@@ -80,18 +80,22 @@ public class ReservationRoomRepo {
    */
   public List<ReservationRoom> getAll() {
     List<ReservationRoom> list = new ArrayList<>();
-    String sql = "SELECT idReservation, idRoom FROM ReservationRoom";
-
+    String sql = """
+            SELECT rr.idReservation, rr.idRoom, r.number AS roomNumber
+            FROM ReservationRoom rr
+            JOIN Room r ON r.idRoom = rr.idRoom
+        """;
     try (Connection conn = ConexionDB.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql);
         ResultSet rs = ps.executeQuery()) {
 
       while (rs.next()) {
-        list.add(new ReservationRoom(
+        ReservationRoom rr = new ReservationRoom(
             rs.getInt("idReservation"),
-            rs.getInt("idRoom")));
+            rs.getInt("idRoom"));
+        rr.setRoomNumber(rs.getInt("roomNumber"));
+        list.add(rr);
       }
-
     } catch (SQLException e) {
       throw new RuntimeException(
           "Error al obtener las habitaciones de las reservas", e);

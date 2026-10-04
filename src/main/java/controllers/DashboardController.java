@@ -45,10 +45,10 @@ public class DashboardController {
   private ToggleButton btnPersonal;
   @FXML
   private ToggleButton btnConfiguracion;
-  @FXML
-  private Label lblUsuario;
-  @FXML
-  private Button btnSession;
+  //@FXML
+  //private Label lblUsuario;
+  //@FXML
+  //private Button btnSession;
 
   private ToggleGroup menuGroup;
 
@@ -134,8 +134,8 @@ public class DashboardController {
     // 5. Centrar btn hamburguesa al iniciar
     btnMenu.setTranslateX(-10);
 
-    LoginManager.getInstance().refreshConfig(); // por si cambiaron el toggle
-    updateSessionUI();
+    //LoginManager.getInstance().refreshConfig(); // por si cambiaron el toggle
+    //updateSessionUI();
   }
 
   @FXML
@@ -359,9 +359,10 @@ public class DashboardController {
   }
 
   private void ajustarEspaciador(boolean colapsada) {
-    espaciadorTop.setMinHeight(colapsada ? 50 : 0);
-    espaciadorTop.setPrefHeight(colapsada ? 50 : 0);
+    espaciadorTop.setMinHeight(colapsada ? 50 : 15);
+    espaciadorTop.setPrefHeight(colapsada ? 50 : 15);
   }
+  /*
 
   @FXML
   private void handleSessionButton() {
@@ -390,6 +391,7 @@ public class DashboardController {
     updateSessionUI();
   }
 
+
   private void updateSessionUI() {
     LoginManager lm = LoginManager.getInstance();
 
@@ -413,6 +415,8 @@ public class DashboardController {
     }
   }
 
+
+
   private boolean ensureAuthenticated() {
     if (LoginGuard.requireAccess()) {
       updateSessionUI(); // refresca label/button si acaba de loguearse
@@ -422,4 +426,5 @@ public class DashboardController {
     selectButton(btnPlanilla);
     return false;
   }
+  */
 }

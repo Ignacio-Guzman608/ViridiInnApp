@@ -39,8 +39,8 @@ public class DashboardController {
   private ToggleButton btnHabitaciones;
   @FXML
   private ToggleButton btnClientes;
-  @FXML
-  private ToggleButton btnReportes;
+  // @FXML
+  // private ToggleButton btnReportes;
   @FXML
   private ToggleButton btnPersonal;
   @FXML
@@ -73,7 +73,7 @@ public class DashboardController {
     btnReservas.setToggleGroup(menuGroup);
     btnHabitaciones.setToggleGroup(menuGroup);
     btnClientes.setToggleGroup(menuGroup);
-    btnReportes.setToggleGroup(menuGroup);
+    // btnReportes.setToggleGroup(menuGroup);
     btnPersonal.setToggleGroup(menuGroup);
     btnConfiguracion.setToggleGroup(menuGroup);
 
@@ -82,7 +82,7 @@ public class DashboardController {
     btnReservas.setTooltip(new Tooltip("Reservas"));
     btnHabitaciones.setTooltip(new Tooltip("Habitaciones"));
     btnClientes.setTooltip(new Tooltip("Clientes"));
-    btnReportes.setTooltip(new Tooltip("Reportes"));
+    // btnReportes.setTooltip(new Tooltip("Reportes"));
     btnPersonal.setTooltip(new Tooltip("Personal"));
     btnConfiguracion.setTooltip(new Tooltip("Configuracion"));
 
@@ -112,12 +112,12 @@ public class DashboardController {
       selectButton(btnClientes);
       loadView("/views/CustomerView.fxml");
     });
-    btnReportes.setOnAction(e -> {
-      // if (!ensureAuthenticated())
-      // return;
-      selectButton(btnReportes);
-      loadView("/views/Report.fxml");
-    });
+    // btnReportes.setOnAction(e -> {
+    // // if (!ensureAuthenticated())
+    // // return;
+    // selectButton(btnReportes);
+    // loadView("/views/Report.fxml");
+    // });
     btnPersonal.setOnAction(e -> {
       // if (!ensureAuthenticated())
       // return;
@@ -339,9 +339,9 @@ public class DashboardController {
       case "planilla":
         selectButton(btnPlanilla);
         break;
-      case "reportes":
-        selectButton(btnReportes);
-        break;
+      // case "reportes":
+      // selectButton(btnReportes);
+      // break;
       case "personal":
         selectButton(btnPersonal);
         break;

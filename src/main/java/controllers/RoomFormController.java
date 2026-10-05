@@ -174,10 +174,6 @@ public class RoomFormController {
     chkMiniBar.setSelected(room.getFeatures().contains("Minibar"));
   }
 
-  // ============================================================
-  // SAVE
-  // ============================================================
-
   private void saveRoom() {
     logger.debug("Ejecutando saveRoom");
     if (!validateFields())
@@ -195,7 +191,8 @@ public class RoomFormController {
       }
 
       if (success) {
-        showAlert("Éxito", "Habitación guardada", "La habitación se ha guardado correctamente.");
+        // showAlert("Éxito", "Habitación guardada", "La habitación se ha guardado
+        // correctamente.");
         closeWindow();
       }
     } catch (IllegalArgumentException e) {
@@ -329,7 +326,6 @@ public class RoomFormController {
       }
     }
 
-    // ---- Descripción ----
     if (txtDescription.getText().length() > MAX_DESCRIPTION_LENGTH) {
       logger.warn("Intento de ingresar más de {} caracteres en la descripción.", MAX_DESCRIPTION_LENGTH);
       errors.append("La descripción no debe tener más de ")

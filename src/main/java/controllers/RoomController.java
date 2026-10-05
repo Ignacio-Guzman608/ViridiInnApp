@@ -287,7 +287,7 @@ public class RoomController {
     if (occupiedTodayRoomNumbers.contains(selected.getNumber())) {
       showAlert("No permitido",
           "Habitación ocupada",
-          "No se puede marcar como no disponible una habitación ocupada hoy.");
+          "No se puede marcar como no disponible una habitación ocupada.");
       return;
     }
 
@@ -299,15 +299,15 @@ public class RoomController {
     alert.showAndWait().ifPresent(response -> {
       if (response == ButtonType.OK) {
         try {
-          selected.setOutOfService(true); // ← fuerza available=false internamente
+          selected.setOutOfService(true);
           if (roomDAO.update(selected)) {
             masterRoomList.remove(selected);
             filteredRooms.remove(selected);
             tableRooms.refresh();
             clearDetail();
             updateCounter();
-            showAlert("Éxito", "Habitación fuera de servicio",
-                "Ahora aparece en la ventana de fuera de servicio.");
+            // showAlert("Éxito", "Habitación fuera de servicio",
+            // "Ahora aparece en la ventana de fuera de servicio.");
           }
         } catch (RuntimeException e) {
           logger.error("No se pudo marcar fuera de servicio {}", selected.getNumber(), e);
@@ -321,6 +321,13 @@ public class RoomController {
     Room selected = tableRooms.getSelectionModel().getSelectedItem();
     if (selected == null)
       return;
+
+    if (occupiedTodayRoomNumbers.contains(selected.getNumber())) {
+      showAlert("No permitido",
+          "Habitación ocupada",
+          "No se puede eliminar una habitación ocupada.");
+      return;
+    }
 
     Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
     alert.setTitle("Eliminar habitación");
@@ -337,7 +344,7 @@ public class RoomController {
             tableRooms.refresh();
             clearDetail();
             updateCounter();
-            showAlert("Éxito", "Habitación eliminada", "");
+            // showAlert("Éxito", "Habitación eliminada", "");
           }
         } catch (RuntimeException e) {
           logger.error("No se pudo eliminar habitación {}", selected.getNumber(), e);

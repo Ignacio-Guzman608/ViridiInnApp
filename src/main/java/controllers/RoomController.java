@@ -53,8 +53,6 @@ public class RoomController {
   @FXML
   private Button btnEdit;
   @FXML
-  private Button btnDeactivate; // Marcar como no disponible
-  @FXML
   private Button btnOutOfService; // Marcar fuera de servicio
   @FXML
   private Button btnDelete;
@@ -164,13 +162,11 @@ public class RoomController {
       }
       boolean selected = newVal != null;
       btnEdit.setDisable(!selected);
-      btnDeactivate.setDisable(!selected);
       btnOutOfService.setDisable(!selected);
       btnDelete.setDisable(!selected);
     });
 
     btnEdit.setDisable(true);
-    btnDeactivate.setDisable(true);
     btnOutOfService.setDisable(true);
     btnDelete.setDisable(true);
 
@@ -178,7 +174,6 @@ public class RoomController {
     btnNewRoom.setOnAction(e -> openRoomForm(null));
     btnViewUnavailable.setOnAction(e -> openUnavailableRoomsWindow());
     btnEdit.setOnAction(e -> openRoomForm(tableRooms.getSelectionModel().getSelectedItem()));
-    btnDeactivate.setOnAction(e -> deactivateRoom()); // → "no disponible"
     btnOutOfService.setOnAction(e -> markAsOutOfService()); // → "fuera de servicio"
     btnDelete.setOnAction(e -> deleteRoom());
   }
@@ -284,7 +279,7 @@ public class RoomController {
     }
   }
 
-  private void deactivateRoom() {
+  private void markAsOutOfService() {
     Room selected = tableRooms.getSelectionModel().getSelectedItem();
     if (selected == null)
       return;
@@ -295,34 +290,6 @@ public class RoomController {
           "No se puede marcar como no disponible una habitación ocupada hoy.");
       return;
     }
-    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-    alert.setTitle("Marcar como no disponible");
-    alert.setHeaderText("¿Desea marcar esta habitación como no disponible?");
-    alert.setContentText("La habitación " + selected.getNumber()
-        + " no podrá ser reservada, pero seguirá visible en la lista.");
-    alert.showAndWait().ifPresent(response -> {
-      if (response == ButtonType.OK) {
-        try {
-          selected.setAvailable(false); // ← solo cambia available
-          if (roomDAO.update(selected)) {
-            tableRooms.refresh();
-            showDetail(selected);
-            updateCounter();
-            showAlert("Éxito", "Habitación actualizada",
-                "Ahora figura como no disponible.");
-          }
-        } catch (RuntimeException e) {
-          logger.error("No se pudo actualizar la habitación {}", selected.getNumber(), e);
-          showAlert("Error", "No se pudo actualizar", e.getMessage());
-        }
-      }
-    });
-  }
-
-  private void markAsOutOfService() {
-    Room selected = tableRooms.getSelectionModel().getSelectedItem();
-    if (selected == null)
-      return;
 
     Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
     alert.setTitle("Marcar fuera de servicio");

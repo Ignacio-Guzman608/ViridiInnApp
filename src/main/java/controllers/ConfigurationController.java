@@ -11,85 +11,79 @@ import java.io.IOException;
 
 public class ConfigurationController {
 
-    @FXML
-    private Button btnProducts;
+  @FXML
+  private Button btnProducts;
 
-    @FXML
-    private Button btnServices;
+  @FXML
+  private Button btnServices;
 
-    @FXML
-    public void initialize() {
+  // 🔑 Referencias a las ventanas hijas
+  private Stage productsStage;
+  private Stage servicesStage;
 
-        btnProducts.setOnAction(e -> openProducts());
+  @FXML
+  public void initialize() {
+    btnProducts.setOnAction(e -> openProducts());
+    btnServices.setOnAction(e -> openServices());
+  }
 
-        btnServices.setOnAction(e -> openServices());
+  private void openProducts() {
+
+    // 🔑 Si ya está abierta, traerla al frente y salir
+    if (productsStage != null && productsStage.isShowing()) {
+      productsStage.toFront();
+      productsStage.requestFocus();
+      return;
     }
 
-    private void openProducts() {
+    try {
 
-        try {
+      FXMLLoader loader = new FXMLLoader(
+          getClass().getResource("/views/Product.fxml"));
 
-            FXMLLoader loader =
-                    new FXMLLoader(
-                            getClass().getResource(
-                                    "/views/Product.fxml"
-                            )
-                    );
+      productsStage = new Stage();
+      productsStage.setScene(new Scene(loader.load()));
+      StyleManager.applyStyles(productsStage);
+      productsStage.setTitle("Productos");
 
-            Stage stage = new Stage();
+      // 🔑 Al cerrarse: limpiar referencia
+      productsStage.setOnHidden(evt -> productsStage = null);
 
-            stage.setScene(
-                    new Scene(loader.load())
-            );
+      productsStage.show(); // show() está bien si querés ventana no-modal
 
-            StyleManager.applyStyles(stage);
+    } catch (IOException e) {
+      productsStage = null;
+      e.printStackTrace();
+    }
+  }
 
-            stage.setTitle("Productos");
+  private void openServices() {
 
-            stage.show();
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        }
+    // 🔑 Si ya está abierta, traerla al frente y salir
+    if (servicesStage != null && servicesStage.isShowing()) {
+      servicesStage.toFront();
+      servicesStage.requestFocus();
+      return;
     }
 
-    private void openServices() {
+    try {
 
-        System.out.println("CLICK EN SERVICIOS");
+      FXMLLoader loader = new FXMLLoader(
+          getClass().getResource("/views/Service.fxml"));
 
-        try {
+      servicesStage = new Stage();
+      servicesStage.setScene(new Scene(loader.load()));
+      StyleManager.applyStyles(servicesStage);
+      servicesStage.setTitle("Servicios");
 
-            FXMLLoader loader =
-                    new FXMLLoader(
-                            getClass().getResource(
-                                    "/views/Service.fxml"
-                            )
-                    );
+      // 🔑 Al cerrarse: limpiar referencia
+      servicesStage.setOnHidden(evt -> servicesStage = null);
 
-            System.out.println("FXML encontrado, intentando cargar...");
+      servicesStage.show();
 
-            Stage stage = new Stage();
-
-            stage.setScene(
-                    new Scene(loader.load())
-            );
-
-            System.out.println("FXML cargado correctamente.");
-
-            StyleManager.applyStyles(stage);
-
-            stage.setTitle("Servicios");
-
-            stage.show();
-
-            System.out.println("Ventana de servicios abierta.");
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-        }
+    } catch (Exception e) {
+      servicesStage = null;
+      e.printStackTrace();
     }
+  }
 }
-
-

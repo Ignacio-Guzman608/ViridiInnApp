@@ -19,7 +19,7 @@ public class ReservationRoomRepo {
     String sql = "INSERT INTO ReservationRoom (idReservation, idRoom) VALUES (?, ?)";
 
     try (Connection conn = ConexionDB.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql)) {
+         PreparedStatement ps = conn.prepareStatement(sql)) {
 
       ps.setInt(1, reservationRoom.getIdReservation());
       ps.setInt(2, reservationRoom.getIdRoom());
@@ -50,25 +50,31 @@ public class ReservationRoomRepo {
   public List<ReservationRoom> getByReservation(int idReservation) {
     List<ReservationRoom> rooms = new ArrayList<>();
 
-    String sql = "SELECT idReservation, idRoom FROM ReservationRoom WHERE idReservation = ?";
+    String sql = """
+        SELECT rr.idReservation, rr.idRoom, r.number AS roomNumber
+        FROM ReservationRoom rr
+        JOIN Room r ON r.idRoom = rr.idRoom
+        WHERE rr.idReservation = ?
+        """;
 
     try (Connection conn = ConexionDB.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql)) {
+         PreparedStatement ps = conn.prepareStatement(sql)) {
 
       ps.setInt(1, idReservation);
 
       try (ResultSet rs = ps.executeQuery()) {
         while (rs.next()) {
           ReservationRoom rr = new ReservationRoom(
-              rs.getInt("idReservation"),
-              rs.getInt("idRoom"));
+                  rs.getInt("idReservation"),
+                  rs.getInt("idRoom"));
+          rr.setRoomNumber(rs.getInt("roomNumber"));
           rooms.add(rr);
         }
       }
 
     } catch (SQLException e) {
       throw new RuntimeException(
-          "Error al obtener habitaciones de la reserva " + idReservation, e);
+              "Error al obtener habitaciones de la reserva " + idReservation, e);
     }
 
     return rooms;
@@ -86,19 +92,19 @@ public class ReservationRoomRepo {
             JOIN Room r ON r.idRoom = rr.idRoom
         """;
     try (Connection conn = ConexionDB.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ResultSet rs = ps.executeQuery()) {
+         PreparedStatement ps = conn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
 
       while (rs.next()) {
         ReservationRoom rr = new ReservationRoom(
-            rs.getInt("idReservation"),
-            rs.getInt("idRoom"));
+                rs.getInt("idReservation"),
+                rs.getInt("idRoom"));
         rr.setRoomNumber(rs.getInt("roomNumber"));
         list.add(rr);
       }
     } catch (SQLException e) {
       throw new RuntimeException(
-          "Error al obtener las habitaciones de las reservas", e);
+              "Error al obtener las habitaciones de las reservas", e);
     }
 
     return list;
@@ -116,7 +122,7 @@ public class ReservationRoomRepo {
 
     } catch (SQLException e) {
       throw new RuntimeException(
-          "Error al eliminar las habitaciones de la reserva", e);
+              "Error al eliminar las habitaciones de la reserva", e);
     }
   }
 
@@ -134,8 +140,8 @@ public class ReservationRoomRepo {
    *                               no chocar consigo misma)
    */
   public List<Integer> getOccupiedRoomIds(LocalDate checkIn,
-      LocalDate checkOut,
-      Integer idReservationToExclude) {
+                                          LocalDate checkOut,
+                                          Integer idReservationToExclude) {
     List<Integer> occupiedRooms = new ArrayList<>();
 
     String sql = """
@@ -150,7 +156,7 @@ public class ReservationRoomRepo {
         """;
 
     try (Connection conn = ConexionDB.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql)) {
+         PreparedStatement ps = conn.prepareStatement(sql)) {
 
       ps.setDate(1, java.sql.Date.valueOf(checkOut));
       ps.setDate(2, java.sql.Date.valueOf(checkIn));

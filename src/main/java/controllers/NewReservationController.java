@@ -791,24 +791,32 @@ public class NewReservationController {
   }
 
   private void updateTotalRate() {
-    if (loadingReservation || txtTotalRate.isFocused()) return;
+      if (loadingReservation || txtTotalRate.isFocused()) return;
 
-    if (selectedRooms.isEmpty()) {
-      txtTotalRate.setText("0.00");
-      return;
-    }
+      if (selectedRooms.isEmpty()) {
+        setRateText("0.00");
+        return;
+      }
 
-    double pricePerNight = selectedRooms.stream().mapToDouble(Room::getPrice).sum();
-    long nights = 1;
+      double pricePerNight = selectedRooms.stream().mapToDouble(Room::getPrice).sum();
+      long nights = 1;
 
-    if (dpCheckIn.getValue() != null && dpCheckOut.getValue() != null) {
-      nights = ChronoUnit.DAYS.between(dpCheckIn.getValue(), dpCheckOut.getValue());
-      if (nights <= 0) nights = 1;
-    }
+      if (dpCheckIn.getValue() != null && dpCheckOut.getValue() != null) {
+        nights = ChronoUnit.DAYS.between(dpCheckIn.getValue(), dpCheckOut.getValue());
+        if (nights <= 0) nights = 1;
+      }
 
-    txtTotalRate.setText(String.format("%.2f", pricePerNight * nights));
+      setRateText(String.format(java.util.Locale.US, "%.2f", pricePerNight * nights));
   }
 
+  /** Setea el total respetando el filtro (coma decimal). */
+  private void setRateText(String value) {
+      if (value == null) {
+          txtTotalRate.setText("");
+          return;
+      }
+      txtTotalRate.setText(value.replace('.', ','));
+  }
   private void loadCustomers() {
     try {
       List<Customer> customers = customerDAO.listAll();

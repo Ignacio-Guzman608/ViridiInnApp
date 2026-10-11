@@ -8,6 +8,7 @@ import javafx.util.StringConverter;
 import models.*;
 import repositories.*;
 import utils.Alerts;
+import utils.StyleManager;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -181,7 +182,15 @@ public class StaffFormController {
   }
 
   private void setupButtonActions() {
-    btnCancel.setOnAction(e -> closeWindow());
+    btnCancel.setOnAction(e -> {
+      boolean confirmed = StyleManager.showConfirmation(
+          "Cancelar",
+          "¿Descartar cambios?",
+          "Perderá todo lo que haya modificado o agregado en el formulario.");
+      if (confirmed) {
+        closeWindow();
+      }
+    });
     btnSave.setOnAction(e -> saveStaff());
   }
 

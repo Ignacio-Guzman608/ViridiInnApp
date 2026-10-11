@@ -4,6 +4,7 @@ import models.Staff;
 import models.StaffStatus;
 import repositories.StaffDAO;
 import utils.Alerts;
+import utils.StyleManager;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -174,11 +175,21 @@ public class StaffController {
       Stage stage = new Stage();
       stage.setTitle(staffAEditar == null ? "Nuevo Personal" : "Editar Personal");
       stage.setScene(new Scene(root));
-      stage.initModality(Modality.APPLICATION_MODAL);
-      stage.showAndWait();
 
-      cargarDatos();
-      aplicarFiltros();
+      StyleManager.applyStyles(stage);
+      stage.initOwner(tableStaff.getScene().getWindow());
+      stage.initModality(Modality.APPLICATION_MODAL);
+
+      // 🎯 Mientras el form esté abierto, los Alerts se centran sobre el form
+      javafx.stage.Window previousOwner = StyleManager.getOwner();
+      stage.setOnShown(e -> StyleManager.setOwner(stage));
+      stage.setOnHidden(e -> {
+        StyleManager.setOwner(previousOwner);
+        cargarDatos();
+        aplicarFiltros();
+      });
+
+      stage.showAndWait();
 
     } catch (IOException e) {
       mostrarAlerta("No se pudo abrir el formulario: " + e.getMessage());
@@ -213,8 +224,6 @@ public class StaffController {
 
   @FXML
   private void handleViewHistory() {
-    // Ya no depende de tener un empleado seleccionado: esta ventana
-    // ahora muestra el listado completo de Personal Inactivo.
     try {
       FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/StaffHistory.fxml"));
       Parent root = loader.load();
@@ -223,8 +232,14 @@ public class StaffController {
       stage.setTitle("Personal Inactivo");
       stage.setScene(new Scene(root));
 
-      // Al cerrar esta ventana, refrescamos la tabla principal
-      // por si se reactivó a algún empleado desde ahí.
+      // 🎨 Mismo CSS que el resto
+      StyleManager.applyStyles(stage);
+
+      // 🎯 Modal + centrada sobre la ventana principal
+      stage.initOwner(tableStaff.getScene().getWindow());
+      stage.initModality(Modality.WINDOW_MODAL);
+
+      // Al cerrar, refrescamos la tabla principal
       stage.setOnHidden(e -> {
         cargarDatos();
         aplicarFiltros();

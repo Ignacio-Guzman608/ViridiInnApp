@@ -11,6 +11,7 @@ import models.Room;
 import repositories.RoomDAO;
 import repositories.RoomTypeDAO;
 import repositories.RoomViewDAO;
+import utils.Alerts;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -524,10 +525,6 @@ public class RoomFormController {
   }
 
   private void showAlert(String title, String header, String content) {
-    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-    alert.setTitle(title);
-    alert.setHeaderText(header);
-    alert.setContentText(content);
-    alert.showAndWait();
+    Alerts.info(title, header, content);
   }
 }

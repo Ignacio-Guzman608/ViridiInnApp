@@ -882,7 +882,7 @@ public class NewReservationController {
       return;
 
     if (selectedRooms.isEmpty()) {
-      txtTotalRate.setText("0.00");
+      setRateText("0.00");
       return;
     }
 
@@ -895,7 +895,19 @@ public class NewReservationController {
         nights = 1;
     }
 
-    txtTotalRate.setText(String.format("%.2f", pricePerNight * nights));
+    setRateText(String.format(java.util.Locale.US, "%.2f", pricePerNight * nights));
+  }
+
+  /**
+   * Setea el total respetando el filtro (coma decimal en vez de punto).
+   * Sin esto, el TextFormatter rechaza el valor y el campo no se actualiza.
+   */
+  private void setRateText(String value) {
+    if (value == null) {
+      txtTotalRate.setText("");
+      return;
+    }
+    txtTotalRate.setText(value.replace('.', ','));
   }
 
   private void loadCustomers() {

@@ -193,20 +193,22 @@ public class StaffController {
       return;
     }
 
-    Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION,
-        "¿Seguro que querés inactivar a " + seleccionado.getFullName() + "?");
-    confirmacion.showAndWait().ifPresent(respuesta -> {
-      if (respuesta == ButtonType.OK) {
-        try {
-          staffDAO.deactivate(seleccionado.getId());
-          cargarDatos();
-          aplicarFiltros();
-          mostrarAlerta("El registro del personal fue inactivado satisfactoriamente.");
-        } catch (SQLException e) {
-          mostrarAlerta("No se pudo inactivar: " + e.getMessage());
-        }
-      }
-    });
+    boolean confirmado = Alerts.confirm(
+        "Inactivar personal",
+        "¿Seguro que querés inactivar a " + seleccionado.getFullName() + "?",
+        "El empleado pasará al listado de inactivos y podrá reactivarse después.");
+
+    if (!confirmado)
+      return;
+
+    try {
+      staffDAO.deactivate(seleccionado.getId());
+      cargarDatos();
+      aplicarFiltros();
+      // mostrarAlerta("El registro del personal fue inactivado satisfactoriamente.");
+    } catch (SQLException e) {
+      mostrarAlerta("No se pudo inactivar: " + e.getMessage());
+    }
   }
 
   @FXML

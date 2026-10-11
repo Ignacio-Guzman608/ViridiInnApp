@@ -14,6 +14,7 @@ public class MainApp extends Application {
     Scene scene = new Scene(root, 1200, 800);
     // Aplicar el CSS global a la escena principal
     StyleManager.applyStyles(scene);
+    StyleManager.setOwner(primaryStage);
     scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
     primaryStage.setTitle("Sistema de Reservas - Dashboard");
     primaryStage.setScene(scene);

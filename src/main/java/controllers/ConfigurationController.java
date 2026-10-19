@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import utils.StyleManager;
 
@@ -11,79 +12,59 @@ import java.io.IOException;
 
 public class ConfigurationController {
 
-  @FXML
-  private Button btnProducts;
+    @FXML
+    private Button btnProducts;
 
-  @FXML
-  private Button btnServices;
+    @FXML
+    private Button btnServices;
 
-  // 🔑 Referencias a las ventanas hijas
-  private Stage productsStage;
-  private Stage servicesStage;
-
-  @FXML
-  public void initialize() {
-    btnProducts.setOnAction(e -> openProducts());
-    btnServices.setOnAction(e -> openServices());
-  }
-
-  private void openProducts() {
-
-    // 🔑 Si ya está abierta, traerla al frente y salir
-    if (productsStage != null && productsStage.isShowing()) {
-      productsStage.toFront();
-      productsStage.requestFocus();
-      return;
+    @FXML
+    public void initialize() {
+        btnProducts.setOnAction(e -> openProducts());
+        btnServices.setOnAction(e -> openServices());
     }
 
-    try {
+    private void openProducts() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/views/Product.fxml"));
 
-      FXMLLoader loader = new FXMLLoader(
-          getClass().getResource("/views/Product.fxml"));
+            Stage stage = new Stage();
+            stage.setScene(new Scene(loader.load()));
 
-      productsStage = new Stage();
-      productsStage.setScene(new Scene(loader.load()));
-      StyleManager.applyStyles(productsStage);
-      productsStage.setTitle("Productos");
+            StyleManager.applyStyles(stage);
 
-      // 🔑 Al cerrarse: limpiar referencia
-      productsStage.setOnHidden(evt -> productsStage = null);
+            // 🎯 Modal + centrada sobre la ventana principal
+            stage.initOwner(btnProducts.getScene().getWindow());
+            stage.initModality(Modality.WINDOW_MODAL);
 
-      productsStage.show(); // show() está bien si querés ventana no-modal
+            stage.setTitle("Productos");
+            stage.show();
 
-    } catch (IOException e) {
-      productsStage = null;
-      e.printStackTrace();
-    }
-  }
-
-  private void openServices() {
-
-    // 🔑 Si ya está abierta, traerla al frente y salir
-    if (servicesStage != null && servicesStage.isShowing()) {
-      servicesStage.toFront();
-      servicesStage.requestFocus();
-      return;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    try {
+    private void openServices() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/views/Service.fxml"));
 
-      FXMLLoader loader = new FXMLLoader(
-          getClass().getResource("/views/Service.fxml"));
+            Stage stage = new Stage();
+            stage.setScene(new Scene(loader.load()));
 
-      servicesStage = new Stage();
-      servicesStage.setScene(new Scene(loader.load()));
-      StyleManager.applyStyles(servicesStage);
-      servicesStage.setTitle("Servicios");
+            StyleManager.applyStyles(stage);
 
-      // 🔑 Al cerrarse: limpiar referencia
-      servicesStage.setOnHidden(evt -> servicesStage = null);
+            // 🎯 Modal + centrada sobre la ventana principal
+            stage.initOwner(btnServices.getScene().getWindow());
+            stage.initModality(Modality.WINDOW_MODAL);
 
-      servicesStage.show();
+            stage.setTitle("Servicios");
+            stage.show();
 
-    } catch (Exception e) {
-      servicesStage = null;
-      e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-  }
 }

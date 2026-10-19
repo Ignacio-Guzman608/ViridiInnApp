@@ -8,29 +8,29 @@ import java.util.List;
 
 public class PaymentRepo {
 
-    //VALIDACIONES DEL PAGO
+    // VALIDACIONES DEL PAGO
     private boolean validatePayment(Payment payment) {
 
-            if (payment == null) {
-                System.err.println("El pago ingresado no es válido.");
-                return false;
-            }
+        if (payment == null) {
+            System.err.println("El pago ingresado no es válido.");
+            return false;
+        }
 
-            if (payment.getIdReservation() <= 0) {
-                System.err.println("La reserva asociada al pago no es válida.");
-                return false;
-            }
+        if (payment.getIdReservation() <= 0) {
+            System.err.println("La reserva asociada al pago no es válida.");
+            return false;
+        }
 
-            if (payment.getAmount() == null ||
-                    payment.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-                System.err.println("El importe ingreado debe ser mayor a cero.");
-                return false;
-            }
+        if (payment.getAmount() == null ||
+                payment.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            System.err.println("El importe ingreado debe ser mayor a cero.");
+            return false;
+        }
 
-            if (payment.getPaymentDate() == null) {
-                System.err.println("La fecha del pago es obligatoria.");
-                return false;
-            }
+        if (payment.getPaymentDate() == null) {
+            System.err.println("La fecha del pago es obligatoria.");
+            return false;
+        }
 
         if (payment.getIdPaymentMethod() <= 0) {
             System.err.println("Debe seleccionar un método de pago.");
@@ -42,23 +42,24 @@ public class PaymentRepo {
             return false;
         }
 
-            if (payment.getObservations() != null &&
-                    payment.getObservations().trim().isEmpty()) {
-                System.err.println("La observación no puede contener solo espacios.");
-                return false;
-            }
-
-            return true;
+        if (payment.getObservations() != null &&
+                payment.getObservations().trim().isEmpty()) {
+            System.err.println("La observación no puede contener solo espacios.");
+            return false;
         }
 
-    //crear un pago independiente????????
+        return true;
+    }
+
+    // crear un pago independiente
     public boolean createPayment(Payment payment) {
 
         if (!validatePayment(payment)) {
             return false;
         }
 
-        String sql = "INSERT INTO payment " +
+        // ✅ FIX: Payment (PascalCase)
+        String sql = "INSERT INTO Payment " +
                 "(idReservation, amount, paymentDate, idPaymentMethod, idPaymentStatus, observations) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -74,7 +75,7 @@ public class PaymentRepo {
 
             int rowsAffected = stmt.executeUpdate();
 
-            if(rowsAffected > 0) {
+            if (rowsAffected > 0) {
                 System.out.println("Pago creado correctamente.");
                 return true;
             }
@@ -87,14 +88,15 @@ public class PaymentRepo {
         }
     }
 
-    //para cuando el pago forma parte de una transaccion de reserva
+    // para cuando el pago forma parte de una transaccion de reserva
     public boolean createPayment(Connection conn, Payment payment) {
 
         if (!validatePayment(payment)) {
             return false;
         }
 
-        String sql = "INSERT INTO payment " +
+        // ✅ FIX: Payment
+        String sql = "INSERT INTO Payment " +
                 "(idReservation, amount, paymentDate, idPaymentMethod, " +
                 "idPaymentStatus, observations) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
@@ -133,9 +135,10 @@ public class PaymentRepo {
     public List<Payment> getPayments() {
         List<Payment> payments = new ArrayList<>();
 
+        // ✅ FIX: FROM Payment
         String sql = "SELECT idPayment, idReservation, amount, paymentDate, " +
                 "idPaymentMethod, idPaymentStatus, observations " +
-                "FROM payment";
+                "FROM Payment";
 
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -171,9 +174,10 @@ public class PaymentRepo {
 
     public Payment getPaymentById(int idPayment) {
 
+        // ✅ FIX: FROM Payment
         String sql = "SELECT idPayment, idReservation, amount, paymentDate, " +
                 "idPaymentMethod, idPaymentStatus, observations " +
-                "FROM payment " +
+                "FROM Payment " +
                 "WHERE idPayment = ?";
 
         try (Connection conn = ConexionDB.getConnection();
@@ -212,16 +216,15 @@ public class PaymentRepo {
         return null;
     }
 
-
-    public List<Payment> getPaymentsByReservation(
-            int idReservation) {
+    public List<Payment> getPaymentsByReservation(int idReservation) {
 
         List<Payment> payments = new ArrayList<>();
 
+        // ✅ FIX: FROM Payment
         String sql =
                 "SELECT idPayment, idReservation, amount, paymentDate, " +
                         "idPaymentMethod, idPaymentStatus, observations " +
-                        "FROM payment " +
+                        "FROM Payment " +
                         "WHERE idReservation = ? " +
                         "ORDER BY idPayment";
 
@@ -283,7 +286,6 @@ public class PaymentRepo {
         return payments;
     }
 
-
     public boolean updatePaymentStatus(int idPayment, int idPaymentStatus) {
 
         if (idPayment <= 0) {
@@ -296,7 +298,8 @@ public class PaymentRepo {
             return false;
         }
 
-        String sql = "UPDATE payment " +
+        // ✅ FIX: UPDATE Payment
+        String sql = "UPDATE Payment " +
                 "SET idPaymentStatus = ? " +
                 "WHERE idPayment = ?";
 
@@ -316,7 +319,6 @@ public class PaymentRepo {
 
             return false;
 
-
         } catch (SQLException e) {
             System.err.println(
                     "Error al actualizar el estado del pago: "
@@ -333,7 +335,8 @@ public class PaymentRepo {
             return false;
         }
 
-        String sql = "UPDATE payment SET " +
+        // ✅ FIX: UPDATE Payment
+        String sql = "UPDATE Payment SET " +
                 "amount = ?, " +
                 "paymentDate = ?, " +
                 "idPaymentMethod = ?, " +
@@ -360,15 +363,12 @@ public class PaymentRepo {
 
             return false;
 
-
-
         } catch (SQLException e) {
             System.err.println("Error al actualizar el pago: "
                     + e.getMessage());
 
             return false;
         }
-
     }
 
     // =========================================================
@@ -388,8 +388,9 @@ public class PaymentRepo {
             return false;
         }
 
+        // ✅ FIX: UPDATE Payment
         String sql =
-                "UPDATE payment SET " +
+                "UPDATE Payment SET " +
                         "amount = ?, " +
                         "paymentDate = ?, " +
                         "idPaymentMethod = ?, " +
@@ -427,5 +428,4 @@ public class PaymentRepo {
             return false;
         }
     }
-
 }

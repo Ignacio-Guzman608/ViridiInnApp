@@ -14,8 +14,7 @@ public class PaymentMethodRepo {
 
         List<PaymentMethod> paymentMethods = new ArrayList<>();
 
-        String sql = "SELECT idPaymentMethod, name " +
-                "FROM paymentmethod";
+        String sql = "SELECT idPaymentMethod, name FROM PaymentMethod";
 
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);

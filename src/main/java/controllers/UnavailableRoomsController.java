@@ -9,6 +9,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import models.Room;
 import repositories.RoomDAO;
+import utils.Alerts;
 
 public class UnavailableRoomsController {
 
@@ -84,27 +85,27 @@ public class UnavailableRoomsController {
     if (selected == null)
       return;
 
-    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-    alert.setTitle("Reactivar habitación");
-    alert.setHeaderText("¿Desea volver a marcar como disponible esta habitación?");
-    alert.setContentText("La habitación " + selected.getNumber() + " estará disponible nuevamente.");
-    alert.showAndWait().ifPresent(response -> {
-      if (response == ButtonType.OK) {
-        try {
-          selected.setOutOfService(false);
-          if (roomDAO.update(selected)) {
-            unavailableRooms.remove(selected);
-            filteredUnavailable.remove(selected);
-            tableUnavailableRooms.refresh();
-            updateCounter();
-            showAlert("Éxito", "Habitación reactivada",
-                "La habitación ha sido reactivada correctamente.");
-          }
-        } catch (RuntimeException e) {
-          showAlert("Error", "No se pudo reactivar la habitación", e.getMessage());
-        }
+    boolean confirmed = Alerts.confirm(
+        "Reactivar habitación",
+        "¿Desea volver a marcar como disponible esta habitación?",
+        "La habitación " + selected.getNumber() + " estará disponible nuevamente.");
+
+    if (!confirmed)
+      return;
+
+    try {
+      selected.setOutOfService(false);
+      if (roomDAO.update(selected)) {
+        unavailableRooms.remove(selected);
+        filteredUnavailable.remove(selected);
+        tableUnavailableRooms.refresh();
+        updateCounter();
+        // Alerts.info("Éxito", "Habitación reactivada",
+        // "La habitación ha sido reactivada correctamente.");
       }
-    });
+    } catch (RuntimeException e) {
+      Alerts.error("Error", "No se pudo reactivar la habitación", e.getMessage());
+    }
   }
 
   private void updateCounter() {
@@ -113,10 +114,6 @@ public class UnavailableRoomsController {
   }
 
   private void showAlert(String title, String header, String content) {
-    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-    alert.setTitle(title);
-    alert.setHeaderText(header);
-    alert.setContentText(content);
-    alert.showAndWait();
+    Alerts.info(title, header, content);
   }
 }

@@ -75,6 +75,8 @@ public class BookingChartController {
   @FXML
   public void initialize() {
 
+    gridContainer.setOpacity(0);
+
     // =====================================================
     // MES ANTERIOR
     // =====================================================
@@ -131,7 +133,7 @@ public class BookingChartController {
       scrollPane.setHvalue(0);
       scrollPane.setVvalue(0);
 
-      createBookingGrid();
+      Platform.runLater(this::createBookingGrid);
     });
 
     // =====================================================
@@ -145,7 +147,7 @@ public class BookingChartController {
       scrollPane.setHvalue(0);
       scrollPane.setVvalue(0);
 
-      createBookingGrid();
+      Platform.runLater(this::createBookingGrid);
     });
 
     // =====================================================
@@ -159,7 +161,7 @@ public class BookingChartController {
       scrollPane.setHvalue(0);
       scrollPane.setVvalue(0);
 
-      createBookingGrid();
+      Platform.runLater(this::createBookingGrid);
     });
 
     // =====================================================
@@ -173,7 +175,7 @@ public class BookingChartController {
       scrollPane.setHvalue(0);
       scrollPane.setVvalue(0);
 
-      createBookingGrid();
+      Platform.runLater(this::createBookingGrid);
     });
 
     // =====================================================
@@ -195,14 +197,23 @@ public class BookingChartController {
     headerScrollPane.hvalueProperty().bind(
             scrollPane.hvalueProperty()
     );
+
     // =====================================================
-    // SCROLL INICIAL
+    // SCROLL INICIAL Y LISTENER DE TAMAÑO
     // =====================================================
 
     scrollPane.setVvalue(0);
     scrollPane.setHvalue(0);
 
-    Platform.runLater(this::createBookingGrid);
+    scrollPane.viewportBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
+      if (newBounds != null && newBounds.getWidth() > 0) {
+        if (oldBounds == null || oldBounds.getWidth() != newBounds.getWidth()) {
+          createBookingGrid();
+          gridContainer.setOpacity(1);
+        }
+      }
+    });
+
   }
 
   // =========================================================
@@ -222,6 +233,7 @@ public class BookingChartController {
 
   private void updateBookingChart() {
     createBookingGrid();
+    gridContainer.setOpacity(1); // Aseguramos que se vea al cambiar de mes
   }
 
   // =========================================================
@@ -652,8 +664,8 @@ public class BookingChartController {
                 null;
 
         // ---------------------------------------------
-// BUSCAR RESERVA + SEGMENTO
-// ---------------------------------------------
+        // BUSCAR RESERVA + SEGMENTO
+        // ---------------------------------------------
 
         currentReservation = null;
         LocalDate segFrom = null;
@@ -683,9 +695,9 @@ public class BookingChartController {
           if (currentReservation != null) break;
         }
 
-// =================================================
-// RESERVA
-// =================================================
+        // =================================================
+        // RESERVA
+        // =================================================
 
         if (currentReservation != null) {
 
@@ -698,7 +710,7 @@ public class BookingChartController {
             LocalDate date = visibleDates.get(i);
 
             boolean occupied =
-                    !date.isBefore(segFrom) && !date.isAfter(segTo);   // 👈 usa el segmento
+                    !date.isBefore(segFrom) && !date.isAfter(segTo);
 
             if (!occupied) break;
 
@@ -998,9 +1010,9 @@ public class BookingChartController {
         }
 
 
-//====================
-// DÍA LIBRE
-// =================================================
+        // =================================================
+        // DÍA LIBRE
+        // =================================================
 
         else {
 
@@ -1071,11 +1083,6 @@ public class BookingChartController {
    * Calcula los tramos libres (segmentos) de una habitación dentro del rango
    * de una reserva, restando la ocupación de OTRAS reservas sobre esa misma
    * habitación.
-   *
-   * Si la reserva ocupa solo esa habitación en todo el rango, devuelve 1
-   * segmento = el rango completo (comportamiento normal).
-   * Si la reserva es un Hotel Tour (varias habitaciones), devuelve el tramo
-   * efectivo que ocupa cada una.
    */
   private List<LocalDate[]> computeSegments(
           Reservation tourRes,

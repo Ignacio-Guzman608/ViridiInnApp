@@ -243,7 +243,7 @@ public class NewReservationController {
 
     txtPaymentAmount.textProperty().addListener((obs, oldVal, newVal) -> {
       if (touchedFields.contains(txtPaymentAmount) || touchedFields.contains(dpPaymentDate)
-          || touchedFields.contains(cmbPaymentMethod) || touchedFields.contains(cmbPaymentStatus))
+              || touchedFields.contains(cmbPaymentMethod) || touchedFields.contains(cmbPaymentStatus))
         validatePaymentFields();
     });
 
@@ -451,7 +451,7 @@ public class NewReservationController {
         valid = false;
       }
       if (dpPaymentDate.getValue() == null || cmbPaymentMethod.getValue() == null
-          || cmbPaymentStatus.getValue() == null)
+              || cmbPaymentStatus.getValue() == null)
         valid = false;
     }
 
@@ -498,15 +498,17 @@ public class NewReservationController {
     dpCheckIn.setValue(reservation.getCheckIn());
     dpCheckOut.setValue(reservation.getCheckOut());
     txtNumberOfGuests.setText(String.valueOf(reservation.getNumberOfGuests()));
-    txtTotalRate.setText(reservation.getTotalRate() != null ? reservation.getTotalRate().toString() : "");
+
+    // 👈 Usar setRateText para que el filtro no rechace el valor
+    setRateText(reservation.getTotalRate() != null ? reservation.getTotalRate().toString() : "");
 
     cmbReservationStatus.getItems().stream()
-        .filter(s -> s.getIdReservationStatus() == reservation.getIdReservationStatus())
-        .findFirst().ifPresent(cmbReservationStatus::setValue);
+            .filter(s -> s.getIdReservationStatus() == reservation.getIdReservationStatus())
+            .findFirst().ifPresent(cmbReservationStatus::setValue);
 
     cmbReservationType.getItems().stream()
-        .filter(t -> t.getIdReservationType() == reservation.getIdReservationType())
-        .findFirst().ifPresent(cmbReservationType::setValue);
+            .filter(t -> t.getIdReservationType() == reservation.getIdReservationType())
+            .findFirst().ifPresent(cmbReservationType::setValue);
 
     activeRooms.setAll(roomDAO.listActive());
 
@@ -525,7 +527,7 @@ public class NewReservationController {
     loadAvailableRooms();
 
     txtReservationObservations.setText(
-        reservation.getObservations() == null ? "" : reservation.getObservations());
+            reservation.getObservations() == null ? "" : reservation.getObservations());
 
     loadReservationPayment(reservation.getIdReservation());
     loadReservationConsumptions(reservation.getIdReservation());
@@ -550,21 +552,22 @@ public class NewReservationController {
       }
 
       Payment payment = payments.get(0);
-      txtPaymentAmount.setText(payment.getAmount() != null ? payment.getAmount().toString() : "");
+      // 👈 Reemplazamos el punto por coma para el filtro
+      txtPaymentAmount.setText(payment.getAmount() != null ? payment.getAmount().toString().replace('.', ',') : "");
 
       if (payment.getPaymentDate() != null)
         dpPaymentDate.setValue(payment.getPaymentDate().toLocalDate());
 
       cmbPaymentMethod.getItems().stream()
-          .filter(m -> m.getIdPaymentMethod() == payment.getIdPaymentMethod())
-          .findFirst().ifPresent(cmbPaymentMethod::setValue);
+              .filter(m -> m.getIdPaymentMethod() == payment.getIdPaymentMethod())
+              .findFirst().ifPresent(cmbPaymentMethod::setValue);
 
       cmbPaymentStatus.getItems().stream()
-          .filter(s -> s.getIdPaymentStatus() == payment.getIdPaymentStatus())
-          .findFirst().ifPresent(cmbPaymentStatus::setValue);
+              .filter(s -> s.getIdPaymentStatus() == payment.getIdPaymentStatus())
+              .findFirst().ifPresent(cmbPaymentStatus::setValue);
 
       txtPaymentObservations.setText(
-          payment.getObservations() == null ? "" : payment.getObservations());
+              payment.getObservations() == null ? "" : payment.getObservations());
     } catch (Exception e) {
       System.err.println("Error cargando pago: " + e.getMessage());
     }
@@ -591,7 +594,7 @@ public class NewReservationController {
 
     if (requested <= 0 && !openedFromBookingChart) {
       Label placeholder = new Label(
-          "Ingresá la cantidad de huéspedes para ver las habitaciones disponibles.");
+              "Ingresá la cantidad de huéspedes para ver las habitaciones disponibles.");
       placeholder.setStyle("-fx-text-fill: #888; -fx-font-style: italic; -fx-font-size: 13;");
       roomsContainer.getChildren().add(placeholder);
       return;
@@ -618,9 +621,9 @@ public class NewReservationController {
 
         if (!capacityOk && requested > 0) {
           Label warning = new Label(
-              "⚠ La habitación " + selectedRoom.getNumber()
-                  + " tiene capacidad para " + selectedRoom.getCapacity()
-                  + " huésped(es), pero ingresaste " + requested + ".");
+                  "⚠ La habitación " + selectedRoom.getNumber()
+                          + " tiene capacidad para " + selectedRoom.getCapacity()
+                          + " huésped(es), pero ingresaste " + requested + ".");
           warning.setStyle("-fx-text-fill: #b36b00; -fx-font-weight: bold; -fx-padding: 5 0 10 0;");
           roomsContainer.getChildren().add(warning);
         }
@@ -644,7 +647,7 @@ public class NewReservationController {
         }
       } else if (selectedRoom != null && requested > 0 && !hasEnoughCapacity(selectedRoom)) {
         Label no = new Label(
-            "No hay otras habitaciones disponibles para " + requested + " huésped(es) en estas fechas.");
+                "No hay otras habitaciones disponibles para " + requested + " huésped(es) en estas fechas.");
         no.setStyle("-fx-text-fill: #888; -fx-font-style: italic; -fx-padding: 5 0 5 0;");
         roomsContainer.getChildren().add(no);
       }
@@ -656,8 +659,8 @@ public class NewReservationController {
     // 1) Cards de habitaciones disponibles
     if (!availableRooms.isEmpty()) {
       Set<Integer> selectedIds = selectedRooms.stream()
-          .map(Room::getIdRoom)
-          .collect(java.util.stream.Collectors.toSet());
+              .map(Room::getIdRoom)
+              .collect(java.util.stream.Collectors.toSet());
 
       for (Room room : availableRooms) {
         boolean selected = selectedIds.contains(room.getIdRoom());
@@ -674,12 +677,12 @@ public class NewReservationController {
       for (HotelTour tour : availableTours) {
         VBox tourCard = new VBox(4);
         tourCard.setStyle(
-            "-fx-background-color: #eef4ff;"
-                + " -fx-border-color: #2d6cdf;"
-                + " -fx-border-radius: 8;"
-                + " -fx-background-radius: 8;"
-                + " -fx-padding: 12;"
-                + " -fx-cursor: hand;");
+                "-fx-background-color: #eef4ff;"
+                        + " -fx-border-color: #2d6cdf;"
+                        + " -fx-border-radius: 8;"
+                        + " -fx-background-radius: 8;"
+                        + " -fx-padding: 12;"
+                        + " -fx-cursor: hand;");
 
         Label rooms = new Label("Habitaciones: " + tour.getRoomsSummary());
         rooms.setStyle("-fx-font-weight: bold; -fx-text-fill: #2d6cdf;");
@@ -691,9 +694,9 @@ public class NewReservationController {
 
         for (TourSegment seg : tour.getSegments()) {
           Label segLabel = new Label(String.format(
-              "  • Hab. %d del %s al %s (%d noches, $%.2f)",
-              seg.getRoom().getNumber(), seg.getFrom(), seg.getTo(),
-              seg.getNights(), seg.getSubtotal()));
+                  "  • Hab. %d del %s al %s (%d noches, $%.2f)",
+                  seg.getRoom().getNumber(), seg.getFrom(), seg.getTo(),
+                  seg.getNights(), seg.getSubtotal()));
           segLabel.setStyle("-fx-text-fill: #555; -fx-font-size: 11;");
           tourCard.getChildren().add(segLabel);
         }
@@ -717,10 +720,10 @@ public class NewReservationController {
 
       if (reservationToEdit != null && !allowRoomChange) {
         msg = "La habitación asignada a esta reserva ya no está disponible. "
-            + "Tocá \"🔄 Cambiar habitación\" para elegir otra.";
+                + "Tocá \"🔄 Cambiar habitación\" para elegir otra.";
       } else if (reservationToEdit != null) {
         msg = "No hay habitaciones libres para las fechas actuales. "
-            + "Probá cambiar las fechas o tocar \"✖ Cancelar cambio\".";
+                + "Probá cambiar las fechas o tocar \"✖ Cancelar cambio\".";
       } else {
         msg = "No hay habitaciones ni tours disponibles para " + requested + " huésped(es).";
       }
@@ -770,10 +773,10 @@ public class NewReservationController {
       }
 
       boolean isSelected = selectedRooms.stream()
-          .anyMatch(r -> r.getIdRoom() == room.getIdRoom()); // ✅
+              .anyMatch(r -> r.getIdRoom() == room.getIdRoom());
 
       if (isSelected) {
-        selectedRooms.removeIf(r -> r.getIdRoom() == room.getIdRoom()); // ✅
+        selectedRooms.removeIf(r -> r.getIdRoom() == room.getIdRoom());
         card.getStyleClass().remove("selected");
       } else {
         selectedRooms.add(room);
@@ -833,7 +836,7 @@ public class NewReservationController {
     for (Room room : activeRooms) {
       boolean isFree = !occupiedRooms.contains(room.getIdRoom());
       boolean alreadyPicked = selectedRooms.stream()
-          .anyMatch(r -> r.getIdRoom() == room.getIdRoom());
+              .anyMatch(r -> r.getIdRoom() == room.getIdRoom());
       boolean hasCapacity = hasEnoughCapacity(room);
 
       if (isEditMode) {
@@ -859,8 +862,8 @@ public class NewReservationController {
     if (text == null)
       return null;
     return text.trim()
-        .replace(" ", "")
-        .replace(',', '.');
+            .replace(" ", "")
+            .replace(',', '.');
   }
 
   private int getRequestedGuests() {
@@ -878,7 +881,8 @@ public class NewReservationController {
   }
 
   private void updateTotalRate() {
-    if (loadingReservation || txtTotalRate.isFocused())
+    // 👈 Quitamos txtTotalRate.isFocused() para que siempre actualice
+    if (loadingReservation)
       return;
 
     if (selectedRooms.isEmpty()) {
@@ -900,7 +904,6 @@ public class NewReservationController {
 
   /**
    * Setea el total respetando el filtro (coma decimal en vez de punto).
-   * Sin esto, el TextFormatter rechaza el valor y el campo no se actualiza.
    */
   private void setRateText(String value) {
     if (value == null) {
@@ -1028,7 +1031,7 @@ public class NewReservationController {
     colConsumptionType.setCellValueFactory(cellData -> {
       Consumption c = cellData.getValue();
       String t = c.getIdConsumptionType() == 1 ? "Producto"
-          : c.getIdConsumptionType() == 2 ? "Servicio" : "Desconocido";
+              : c.getIdConsumptionType() == 2 ? "Servicio" : "Desconocido";
       return new javafx.beans.property.SimpleStringProperty(t);
     });
 
@@ -1087,14 +1090,14 @@ public class NewReservationController {
 
     if (c.getIdConsumptionType() == 1) {
       Product p = cmbProduct.getItems().stream()
-          .filter(x -> x.getIdProduct() == c.getIdProduct()).findFirst().orElse(null);
+              .filter(x -> x.getIdProduct() == c.getIdProduct()).findFirst().orElse(null);
       cmbProduct.setValue(p);
       cmbService.setValue(null);
       cmbProduct.setDisable(false);
       cmbService.setDisable(true);
     } else {
       Service s = cmbService.getItems().stream()
-          .filter(x -> x.getIdService() == c.getIdService()).findFirst().orElse(null);
+              .filter(x -> x.getIdService() == c.getIdService()).findFirst().orElse(null);
       cmbService.setValue(s);
       cmbProduct.setValue(null);
       cmbProduct.setDisable(true);
@@ -1110,8 +1113,8 @@ public class NewReservationController {
       return;
 
     if (!Alerts.confirm("Anular consumo",
-        "¿Está seguro de anular este consumo?",
-        "El consumo no será eliminado de la base de datos."))
+            "¿Está seguro de anular este consumo?",
+            "El consumo no será eliminado de la base de datos."))
       return;
 
     c.setIdConsumptionStatus(2);
@@ -1196,7 +1199,7 @@ public class NewReservationController {
     BigDecimal total = unitPrice.multiply(BigDecimal.valueOf(quantity));
 
     Consumption c = new Consumption(0, consumptionType, idProduct, idService,
-        quantity, unitPrice, total, LocalDateTime.now(), 1, null);
+            quantity, unitPrice, total, LocalDateTime.now(), 1, null);
     c.setIdConsumptionStatus(1);
     consumptions.add(c);
 
@@ -1275,7 +1278,7 @@ public class NewReservationController {
       consumptionBeingEdited.setTotal(total);
 
       if (consumptionBeingEdited.getIdConsumption() > 0
-          && !modifiedConsumptions.contains(consumptionBeingEdited))
+              && !modifiedConsumptions.contains(consumptionBeingEdited))
         modifiedConsumptions.add(consumptionBeingEdited);
 
       tblConsumptions.refresh();
@@ -1311,14 +1314,14 @@ public class NewReservationController {
 
     if (selected.getIdConsumptionType() == 1) {
       Product p = cmbProduct.getItems().stream()
-          .filter(x -> x.getIdProduct() == selected.getIdProduct()).findFirst().orElse(null);
+              .filter(x -> x.getIdProduct() == selected.getIdProduct()).findFirst().orElse(null);
       cmbProduct.setValue(p);
       cmbService.setValue(null);
       cmbProduct.setDisable(false);
       cmbService.setDisable(true);
     } else {
       Service s = cmbService.getItems().stream()
-          .filter(x -> x.getIdService() == selected.getIdService()).findFirst().orElse(null);
+              .filter(x -> x.getIdService() == selected.getIdService()).findFirst().orElse(null);
       cmbService.setValue(s);
       cmbProduct.setValue(null);
       cmbProduct.setDisable(true);
@@ -1410,9 +1413,9 @@ public class NewReservationController {
       }
 
       Reservation reservation = new Reservation(
-          idCustomer, LocalDateTime.now(), checkIn, checkOut,
-          rs.getIdReservationStatus(), rt.getIdReservationType(),
-          numberOfGuests, totalRate, reservationObs);
+              idCustomer, LocalDateTime.now(), checkIn, checkOut,
+              rs.getIdReservationStatus(), rt.getIdReservationType(),
+              numberOfGuests, totalRate, reservationObs);
 
       conn = ConexionDB.getConnection();
 
@@ -1482,9 +1485,9 @@ public class NewReservationController {
 
       if (!paymentText.isEmpty()) {
         Payment payment = new Payment(
-            idReservation, paymentAmount, paymentDate,
-            paymentMethod.getIdPaymentMethod(),
-            paymentStatus.getIdPaymentStatus(), paymentObs);
+                idReservation, paymentAmount, paymentDate,
+                paymentMethod.getIdPaymentMethod(),
+                paymentStatus.getIdPaymentStatus(), paymentObs);
 
         if (reservationToEdit != null) {
           List<Payment> payments = paymentRepo.getPaymentsByReservation(idReservation);
@@ -1527,9 +1530,9 @@ public class NewReservationController {
       conn.commit();
 
       showSuccess(
-          reservationToEdit == null
-              ? "Reserva creada.\nN° " + idReservation
-              : "Reserva modificada.\nN° " + idReservation);
+              reservationToEdit == null
+                      ? "Reserva creada.\nN° " + idReservation
+                      : "Reserva modificada.\nN° " + idReservation);
 
       handleBack();
 
@@ -1570,8 +1573,8 @@ public class NewReservationController {
 
     if (btnChangeRoom != null) {
       btnChangeRoom.setText(allowRoomChange
-          ? "✖ Cancelar cambio"
-          : "🔄 Cambiar habitación");
+              ? "✖ Cancelar cambio"
+              : "🔄 Cambiar habitación");
     }
 
     loadAvailableRooms();
@@ -1586,8 +1589,8 @@ public class NewReservationController {
   @FXML
   private void handleCancel() {
     if (Alerts.confirm("Cancelar reserva",
-        "¿Está seguro?",
-        "Los datos se perderán.")) {
+            "¿Está seguro?",
+            "Los datos se perderán.")) {
       handleBack();
     }
   }
@@ -1675,8 +1678,8 @@ public class NewReservationController {
   }
 
   /**
-   * Instala un filtro que solo permite dígitos y una coma decimal.
-   * Bloquea letras, puntos, signos, etc.
+   * Instala un filtro que solo permite dígitos y una coma o punto decimal.
+   * Bloquea letras, signos, etc.
    */
   private void installDecimalFilter(TextField field) {
     if (field == null)
@@ -1689,8 +1692,8 @@ public class NewReservationController {
       if (newText.isEmpty())
         return change;
 
-      // Solo dígitos y, como máximo, una coma
-      if (!newText.matches("\\d*,?\\d*"))
+      // Solo dígitos y, como máximo, una coma o punto
+      if (!newText.matches("\\d*[.,]?\\d*"))
         return null;
 
       return change;

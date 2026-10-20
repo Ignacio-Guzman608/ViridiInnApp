@@ -1,6 +1,5 @@
 package controllers;
 
-import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.TextFormatter;
@@ -16,9 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.UnaryOperator;
@@ -153,17 +150,16 @@ public class StaffFormController {
   private void setupButtonActions() {
     btnCancel.setOnAction(e -> {
       boolean ok = StyleManager.showConfirmation(
-          "Cancelar",
-          "¿Descartar cambios?",
-          "Perderá todo lo que haya modificado o agregado en el formulario.");
+              "Cancelar",
+              "¿Descartar cambios?",
+              "Perderá todo lo que haya modificado o agregado en el formulario.");
       if (ok) closeWindow();
     });
     btnSave.setOnAction(e -> saveStaff());
   }
 
-  // ========== VALIDACIONES EN VIVO (patrón RoomForm / CustomerForm) ==========
+  // ========== VALIDACIONES EN VIVO ==========
   private void setupValidations() {
-    // --- TextFields: validar al perder foco ---
     txtFirstName.focusedProperty().addListener((o, a, b) -> { if (!b) { touchedFields.add(txtFirstName); validateFirstName(); } });
     txtLastName .focusedProperty().addListener((o, a, b) -> { if (!b) { touchedFields.add(txtLastName);  validateLastName();  } });
     txtDni      .focusedProperty().addListener((o, a, b) -> { if (!b) { touchedFields.add(txtDni);       validateDni();       } });
@@ -176,7 +172,6 @@ public class StaffFormController {
     txtShiftEnd .focusedProperty().addListener((o, a, b) -> { if (!b) { touchedFields.add(txtShiftEnd);  validateShiftEnd();  } });
     txtSalary   .focusedProperty().addListener((o, a, b) -> { if (!b) { touchedFields.add(txtSalary);    validateSalary();    } });
 
-    // --- DatePickers: validar al cambiar valor + marcar como tocado ---
     dateBirthDate.valueProperty().addListener((o, a, b) -> {
       if (b != null) touchedFields.add(dateBirthDate);
       validateBirthDate();
@@ -188,7 +183,6 @@ public class StaffFormController {
       updateSaveButtonState();
     });
 
-    // --- ComboBox: marcar como tocado al seleccionar ---
     comboPosition.getSelectionModel().selectedItemProperty().addListener((o, a, b) -> {
       if (b != null) touchedFields.add(comboPosition);
       updateSaveButtonState();
@@ -198,7 +192,6 @@ public class StaffFormController {
       updateSaveButtonState();
     });
 
-    // --- Mientras escribe: solo actualizar botón ---
     txtFirstName.textProperty().addListener((o, a, b) -> updateSaveButtonState());
     txtLastName .textProperty().addListener((o, a, b) -> updateSaveButtonState());
     txtDni      .textProperty().addListener((o, a, b) -> updateSaveButtonState());
@@ -212,7 +205,7 @@ public class StaffFormController {
     txtSalary   .textProperty().addListener((o, a, b) -> updateSaveButtonState());
   }
 
-  // ========== VALIDADORES INDIVIDUALES (con feedback) ==========
+  // ========== VALIDADORES INDIVIDUALES ==========
   private boolean validateFirstName() {
     String v = txtFirstName.getText() == null ? "" : txtFirstName.getText().trim();
     boolean ok = false;
@@ -392,7 +385,7 @@ public class StaffFormController {
     return ok;
   }
 
-  // ========== FEEDBACK VISUAL (mismo estilo que los otros forms) ==========
+  // ========== FEEDBACK VISUAL ==========
   private void setFieldValid(Control field, boolean valid, String errorMessage) {
     if (!touchedFields.contains(field)) return;
 
@@ -405,7 +398,7 @@ public class StaffFormController {
     }
   }
 
-  // ========== HELPERS SILENCIOSOS (para habilitar/deshabilitar botón) ==========
+  // ========== HELPERS SILENCIOSOS ==========
   private boolean isValidName(String v) {
     if (v == null) return false;
     v = v.trim();
@@ -439,23 +432,23 @@ public class StaffFormController {
 
   private void updateSaveButtonState() {
     boolean ok =
-        isValidName(txtFirstName.getText()) &&
-        isValidName(txtLastName.getText()) &&
-        isValidDni(txtDni.getText()) &&
-        dateBirthDate.getValue() != null &&
-        !dateBirthDate.getValue().plusYears(MIN_AGE_YEARS).isAfter(LocalDate.now()) &&
-        isValidPhone(txtPhone.getText()) &&
-        isValidEmail(txtEmail.getText()) &&
-        txtStreet.getText() != null && !txtStreet.getText().trim().isEmpty() &&
-        txtStreet.getText().trim().length() <= MAX_STREET_LENGTH &&
-        (txtAddressNumber.getText() == null ||
-            txtAddressNumber.getText().trim().length() <= MAX_ADDRESS_NUMBER_LENGTH) &&
-        txtCity.getText() != null && !txtCity.getText().trim().isEmpty() &&
-        txtCity.getText().trim().length() <= MAX_CITY_LENGTH &&
-        !comboPosition.getSelectionModel().isEmpty() &&
-        dateHireDate.getValue() != null &&
-        !dateHireDate.getValue().isAfter(LocalDate.now()) &&
-        isValidSalary(txtSalary.getText());
+            isValidName(txtFirstName.getText()) &&
+                    isValidName(txtLastName.getText()) &&
+                    isValidDni(txtDni.getText()) &&
+                    dateBirthDate.getValue() != null &&
+                    !dateBirthDate.getValue().plusYears(MIN_AGE_YEARS).isAfter(LocalDate.now()) &&
+                    isValidPhone(txtPhone.getText()) &&
+                    isValidEmail(txtEmail.getText()) &&
+                    txtStreet.getText() != null && !txtStreet.getText().trim().isEmpty() &&
+                    txtStreet.getText().trim().length() <= MAX_STREET_LENGTH &&
+                    (txtAddressNumber.getText() == null ||
+                            txtAddressNumber.getText().trim().length() <= MAX_ADDRESS_NUMBER_LENGTH) &&
+                    txtCity.getText() != null && !txtCity.getText().trim().isEmpty() &&
+                    txtCity.getText().trim().length() <= MAX_CITY_LENGTH &&
+                    !comboPosition.getSelectionModel().isEmpty() &&
+                    dateHireDate.getValue() != null &&
+                    !dateHireDate.getValue().isAfter(LocalDate.now()) &&
+                    isValidSalary(txtSalary.getText());
 
     btnSave.setDisable(!ok);
   }
@@ -463,7 +456,10 @@ public class StaffFormController {
   // ========== EDICIÓN ==========
   public void setStaff(Staff staff) {
     this.editingStaff = staff;
-    lblFormTitle.setText("Editar Personal");
+
+    // Cambiamos el botón a "Actualizar" si estamos editando
+    btnSave.setText("Actualizar");
+
     txtFirstName.setText(staff.getFirstName());
     txtLastName.setText(staff.getLastName());
     txtDni.setText(staff.getDni());
@@ -502,8 +498,8 @@ public class StaffFormController {
       boolean success = editingStaff != null ? staffDAO.isUpdate(staff) : staffDAO.isInsert(staff);
       if (success) {
         showAlert(editingStaff != null
-            ? "El empleado ha sido actualizado correctamente."
-            : "El empleado se ha creado correctamente.");
+                ? "El empleado ha sido actualizado correctamente."
+                : "El empleado se ha creado correctamente.");
         closeWindow();
       }
     } catch (SQLException e) {
@@ -514,7 +510,6 @@ public class StaffFormController {
   }
 
   private boolean validateAllFields() {
-    // Marcar todos como tocados para que el feedback se aplique
     touchedFields.add(txtFirstName);
     touchedFields.add(txtLastName);
     touchedFields.add(txtDni);
@@ -541,7 +536,6 @@ public class StaffFormController {
     ok &= validateAddressNumber();
     ok &= validateCity();
 
-    // Combos / DatePicker
     if (comboPosition.getSelectionModel().isEmpty()) {
       setFieldValid(comboPosition, false, "Debe seleccionar un Cargo.");
       ok = false;
@@ -576,8 +570,8 @@ public class StaffFormController {
 
     String shiftSelected = comboShiftName.getSelectionModel().getSelectedItem();
     staff.setIdShift((shiftSelected == null || shiftSelected.isEmpty())
-        ? null
-        : getIdBySelection(comboShiftName, shifts));
+            ? null
+            : getIdBySelection(comboShiftName, shifts));
 
     staff.setShiftStart(parseHora(txtShiftStart.getText()));
     staff.setShiftEnd(parseHora(txtShiftEnd.getText()));

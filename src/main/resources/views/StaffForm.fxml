@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       stylesheets="@/css/style.css"
@@ -19,7 +20,14 @@
         <Insets top="20" right="24" bottom="20" left="24"/>
     </padding>
 
-    <Label fx:id="lblFormTitle" text="Complete el Formulario" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+    <!-- Título modificado -->
+    <Label fx:id="lblFormTitle" text="Complete el Formulario">
+        <font><Font size="20.0" /></font>
+        <style>
+            -fx-font-weight: bold;
+            -fx-text-fill: #245c32;
+        </style>
+    </Label>
 
     <GridPane hgap="14" vgap="12">
         <columnConstraints>
@@ -75,6 +83,7 @@
 
     <HBox spacing="10" alignment="CENTER_RIGHT">
         <Button fx:id="btnCancel" text="Cancelar" styleClass="btn-secondary"/>
+        <!-- Botón modificado -->
         <Button fx:id="btnSave" text="Guardar" styleClass="btn-primary" disable="true"/>
     </HBox>
 </VBox>

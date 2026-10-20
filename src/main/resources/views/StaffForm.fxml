@@ -19,7 +19,7 @@
         <Insets top="20" right="24" bottom="20" left="24"/>
     </padding>
 
-    <Label fx:id="lblFormTitle" text="Nuevo Personal" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+    <Label fx:id="lblFormTitle" text="Complete el Formulario" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
 
     <GridPane hgap="14" vgap="12">
         <columnConstraints>

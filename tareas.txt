@@ -1,0 +1,6 @@
+mayusculas en nombres de clientes,
+activar login con registro en db??
+boton de manual de usuario
+ordenamiento de grilla
+cambio de tamaño de fuente en mainapp
+

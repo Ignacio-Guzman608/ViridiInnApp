@@ -1,4 +1,4 @@
-mayusculas en nombres de clientes,
+mayusculas en nombres de clientes, listo
 activar login con registro en db??
 boton de manual de usuario
 ordenamiento de grilla

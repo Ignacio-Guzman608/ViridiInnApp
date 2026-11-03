@@ -18,6 +18,7 @@ import auth.LoginGuard;
 import auth.LoginManager;
 import javafx.scene.control.Label;
 import javafx.scene.control.Alert;
+import javafx.stage.Window;
 
 public class DashboardController {
 
@@ -45,10 +46,10 @@ public class DashboardController {
   private ToggleButton btnPersonal;
   @FXML
   private ToggleButton btnConfiguracion;
-  //@FXML
-  //private Label lblUsuario;
-  //@FXML
-  //private Button btnSession;
+  @FXML
+  private Label lblUsuario;
+  @FXML
+  private Button btnSession;
 
   private ToggleGroup menuGroup;
 
@@ -95,20 +96,20 @@ public class DashboardController {
       loadView("/views/BookingChart.fxml");
     });
     btnReservas.setOnAction(e -> {
-      // if (!ensureAuthenticated())
-      // return;
+      if (!ensureAuthenticated())
+        return;
       selectButton(btnReservas);
       loadView("/views/reservations.fxml");
     });
     btnHabitaciones.setOnAction(e -> {
-      // if (!ensureAuthenticated())
-      // return;
+      if (!ensureAuthenticated())
+        return;
       selectButton(btnHabitaciones);
       loadView("/views/RoomView.fxml");
     });
     btnClientes.setOnAction(e -> {
-      // if (!ensureAuthenticated())
-      // return;
+      if (!ensureAuthenticated())
+        return;
       selectButton(btnClientes);
       loadView("/views/CustomerView.fxml");
     });
@@ -119,14 +120,14 @@ public class DashboardController {
     // loadView("/views/Report.fxml");
     // });
     btnPersonal.setOnAction(e -> {
-      // if (!ensureAuthenticated())
-      // return;
+      if (!ensureAuthenticated())
+        return;
       selectButton(btnPersonal);
       loadView("/views/StaffView.fxml");
     });
     btnConfiguracion.setOnAction(e -> {
-      // if (!ensureAuthenticated())
-      // return;
+      if (!ensureAuthenticated())
+        return;
       selectButton(btnConfiguracion);
       loadView("/views/Configuration.fxml");
     });
@@ -134,8 +135,8 @@ public class DashboardController {
     // 5. Centrar btn hamburguesa al iniciar
     btnMenu.setTranslateX(-10);
 
-    //LoginManager.getInstance().refreshConfig(); // por si cambiaron el toggle
-    //updateSessionUI();
+    LoginManager.getInstance().refreshConfig(); // por si cambiaron el toggle
+    updateSessionUI();
   }
 
   @FXML
@@ -213,6 +214,8 @@ public class DashboardController {
   }
 
   public void loadEditReservation(Reservation reservation) {
+    if (!ensureAuthenticated())
+      return; // ⬅️ NUEVO
     selectSidebarButton("reservas");
     try {
 
@@ -240,6 +243,8 @@ public class DashboardController {
   }
 
   public void loadNewReservation() {
+    if (!ensureAuthenticated())
+      return; // ⬅️ NUEVO
     selectSidebarButton("reservas");
 
     try {
@@ -266,6 +271,8 @@ public class DashboardController {
   }
 
   public void loadReservationConsumptions(Reservation reservation) {
+    if (!ensureAuthenticated())
+      return; // ⬅️ NUEVO
     selectSidebarButton("reservas");
     try {
 
@@ -294,6 +301,8 @@ public class DashboardController {
   }
 
   public void loadReservationDetail(Reservation reservation) {
+    if (!ensureAuthenticated())
+      return; // ⬅️ NUEVO
     selectSidebarButton("reservas");
     try {
 
@@ -362,7 +371,6 @@ public class DashboardController {
     espaciadorTop.setMinHeight(colapsada ? 50 : 15);
     espaciadorTop.setPrefHeight(colapsada ? 50 : 15);
   }
-  /*
 
   @FXML
   private void handleSessionButton() {
@@ -381,16 +389,14 @@ public class DashboardController {
 
     if (lm.isAuthenticated()) {
       lm.logout();
-
       selectButton(btnPlanilla);
       loadView("/views/BookingChart.fxml");
     } else {
-      LoginGuard.requireAccess();
+      LoginGuard.requireAccess(ownerWindow()); // ✅ ya tenía owner
     }
 
     updateSessionUI();
   }
-
 
   private void updateSessionUI() {
     LoginManager lm = LoginManager.getInstance();
@@ -415,16 +421,24 @@ public class DashboardController {
     }
   }
 
-
-
-  private boolean ensureAuthenticated() {
-    if (LoginGuard.requireAccess()) {
-      updateSessionUI(); // refresca label/button si acaba de loguearse
+  /**
+   * Verifica sesión. Ahora es público y pasa el owner al diálogo,
+   * así todos los flujos (loadNewReservation, loadEditReservation, etc.)
+   * abren el login como diálogo hijo centrado sobre el dashboard.
+   */
+  public boolean ensureAuthenticated() { // ⬅️ public
+    if (LoginGuard.requireAccess(ownerWindow())) { // ⬅️ owner
+      updateSessionUI();
       return true;
     }
-
     selectButton(btnPlanilla);
     return false;
   }
-  */
+
+  private Window ownerWindow() {
+    if (centerPane != null && centerPane.getScene() != null) {
+      return centerPane.getScene().getWindow();
+    }
+    return null;
+  }
 }

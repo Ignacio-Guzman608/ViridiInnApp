@@ -78,6 +78,18 @@
                 <!-- Espaciador flexible -->
                 <VBox VBox.vgrow="ALWAYS" />
 
+                <!-- Usuario -->
+                <Label fx:id="lblUsuario" styleClass="sidebar-usuario" text="👤 Sin sesión" />
+
+                <Button fx:id="btnSession" styleClass="sidebar-logout" text="Iniciar sesión"
+                        onAction="#handleSessionButton">
+                    <graphic>
+                        <ImageView fx:id="iconSession" fitHeight="18" fitWidth="18" preserveRatio="true">
+                            <Image url="@../images/log-out.png" />
+                        </ImageView>
+                    </graphic>
+
+                </Button>
             </VBox>
 
             <!-- Botón hamburguesa -->

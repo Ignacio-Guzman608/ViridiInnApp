@@ -1,6 +1,6 @@
 mayusculas en nombres de clientes, listo
 activar login con registro en db??
-boton de manual de usuario
-ordenamiento de grilla
-cambio de tamaño de fuente en mainapp
+boton de manual de usuario 
+ordenamiento de grilla 
+cambio de tamaño de fuente en mainapp listo
 

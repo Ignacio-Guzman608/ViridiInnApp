@@ -5,19 +5,19 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 public class LoginGuard {
 
   private LoginGuard() {
   }
 
-  /**
-   * Devuelve TRUE si la acción puede continuar.
-   * - Login desactivado → TRUE
-   * - Ya logueado → TRUE
-   * - Si no → abre dialog y devuelve el resultado
-   */
+  // Compatibilidad: si no hay owner, sigue funcionando (APPLICATION_MODAL)
   public static boolean requireAccess() {
+    return requireAccess(null);
+  }
+
+  public static boolean requireAccess(Window owner) {
     LoginManager lm = LoginManager.getInstance();
 
     if (!lm.isLoginEnabled())
@@ -27,37 +27,51 @@ public class LoginGuard {
       return true;
     }
 
-    return showLoginDialog();
+    return showLoginDialog(owner);
   }
 
-  /**
-   * Para acciones que requieren un rol específico (ej: ADMIN)
-   */
   public static boolean requireRole(String role) {
-    if (!requireAccess())
+    return requireRole(null, role);
+  }
+
+  public static boolean requireRole(Window owner, String role) {
+    if (!requireAccess(owner))
       return false;
     return LoginManager.getInstance().hasRole(role);
   }
 
-  private static boolean showLoginDialog() {
+  private static boolean showLoginDialog(Window owner) {
     try {
       FXMLLoader loader = new FXMLLoader(
           LoginGuard.class.getResource("/views/Login.fxml"));
       Parent root = loader.load();
 
-      Scene scene = new Scene(root);
-
-      // 👇 Igual que RoomForm: nada de setWidth/setHeight manual
       Stage stage = new Stage();
       stage.setTitle("Iniciar Sesión");
+      stage.setScene(new Scene(root));
+      stage.setResizable(false);
 
-      // Modal: bloquea la principal y queda siempre encima
-      stage.initModality(Modality.APPLICATION_MODAL);
+      // ⚠️ ORDEN: initOwner → initModality → show
+      if (owner != null) {
+        stage.initOwner(owner);
+        stage.initModality(Modality.WINDOW_MODAL); // bloquea SOLO la ventana padre
+      } else {
+        // Sin owner, WINDOW_MODAL se degrada a NONE → usamos APPLICATION_MODAL
+        stage.initModality(Modality.APPLICATION_MODAL);
+      }
 
-      stage.setScene(scene);
+      // Cerrar con la X cuenta como cancelado
+      stage.setOnCloseRequest(e -> stage.setUserData(false));
 
-      stage.sizeToScene();
-      stage.centerOnScreen();
+      // Centrar SOBRE el padre (centerOnScreen centra sobre la pantalla)
+      stage.setOnShown(e -> {
+        if (owner != null) {
+          stage.setX(owner.getX() + (owner.getWidth() - stage.getWidth()) / 2);
+          stage.setY(owner.getY() + (owner.getHeight() - stage.getHeight()) / 2);
+        } else {
+          stage.centerOnScreen();
+        }
+      });
 
       stage.showAndWait();
 
